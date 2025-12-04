@@ -844,6 +844,14 @@
                         alert(`ℹ️ ${nombre} ya tiene asistencia registrada en este evento`);
                     }
 
+                    // Actualizar contadores del dashboard si es nueva asistencia
+                    if (data.asistencia === 'registrada') {
+                        const totalEl = document.getElementById('totalAsistentes');
+                        const manualEl = document.getElementById('totalManuales');
+                        totalEl.textContent = parseInt(totalEl.textContent) + 1;
+                        manualEl.textContent = parseInt(manualEl.textContent) + 1;
+                    }
+
                     // Limpiar formulario
                     document.getElementById('formIngresoManual').reset();
                     document.getElementById('inputRutDv').value = ''; // Limpiar DV también

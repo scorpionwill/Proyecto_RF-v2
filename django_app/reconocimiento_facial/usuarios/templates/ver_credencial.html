@@ -147,13 +147,14 @@
                 <h3>{{ usuario.nombre }}</h3>
                 <p><strong>RUT:</strong> <span>{{ usuario.rut }}</span></p>
                 <p><strong>Carrera:</strong> <span>{{ usuario.carrera|default:"--" }}</span></p>
-                <p><strong>Jornada:</strong> <span>{% if usuario.jornada == 'V' %}Vespertina{% elif usuario.jornada == 'D' %}Diurno{% else %}{{ usuario.jornada|default:"--" }}{% endif %}</span></p>
+                <p><strong>Jornada:</strong> <span>{% if usuario.jornada == 'V' %}Vespertina{% elif usuario.jornada ==
+                        'D' %}Diurno{% else %}{{ usuario.jornada|default:"--" }}{% endif %}</span></p>
             </div>
         </div>
 
         <!-- Botón volver -->
         <div class="text-center">
-            <a href="{% url 'listar_usuarios' %}" class="btn-back">
+            <a href="javascript:history.back()" class="btn-back">
                 <i class="bi bi-arrow-left"></i> Volver a Lista de Usuarios
             </a>
         </div>

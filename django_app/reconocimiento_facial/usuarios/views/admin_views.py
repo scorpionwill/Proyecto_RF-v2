@@ -5,7 +5,19 @@ from django.contrib import messages
 from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm
 from django import forms
+from django.core.exceptions import ValidationError
+import re
 from ..decorators import admin_required
+
+
+def validate_password_strength(password):
+    """Valida que la contraseña tenga mínimo 12 caracteres, 1 número y 1 caracter especial."""
+    if len(password) < 12:
+        raise ValidationError('La contraseña debe tener al menos 12 caracteres.')
+    if not re.search(r'\d', password):
+        raise ValidationError('La contraseña debe contener al menos 1 número.')
+    if not re.search(r'[!@#$%^&*(),.?":{}|<>_\-+=\[\]\\;\'`~]', password):
+        raise ValidationError('La contraseña debe contener al menos 1 caracter especial (!@#$%^&*...).')
 
 
 class EncargadoCreationForm(UserCreationForm):
@@ -22,6 +34,24 @@ class EncargadoCreationForm(UserCreationForm):
             'password1': 'Contraseña',
             'password2': 'Confirmar Contraseña',
         }
+    
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Personalizar help_text para contraseña
+        self.fields['password1'].help_text = (
+            '<ul>'
+            '<li>La contraseña debe tener al menos 12 caracteres.</li>'
+            '<li>Debe contener al menos 1 número.</li>'
+            '<li>Debe contener al menos 1 carácter especial (!@#$%^&*...).</li>'
+            '<li>No puede ser similar a tu información personal.</li>'
+            '</ul>'
+        )
+    
+    def clean_password1(self):
+        password1 = self.cleaned_data.get('password1')
+        if password1:
+            validate_password_strength(password1)
+        return password1
 
 
 @admin_required
