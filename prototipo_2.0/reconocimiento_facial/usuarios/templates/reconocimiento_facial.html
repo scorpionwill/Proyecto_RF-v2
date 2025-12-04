@@ -1,0 +1,854 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Reconocimiento Facial - {{ evento.nombre }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Estilos específicos para el modo reconocimiento */
+    .recognition-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+
+    .camera-feed {
+        background: #000;
+        border-radius: 15px;
+        height: 500px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    }
+
+    .camera-overlay {
+        position: absolute;
+        top: 20px;
+        left: 20px;
+        background: rgba(0, 0, 0, 0.6);
+        padding: 10px 20px;
+        border-radius: 10px;
+        color: #00ff00;
+        font-family: monospace;
+    }
+
+    .event-info {
+        background: white;
+        padding: 20px;
+        border-radius: 15px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        height: 100%;
+    }
+
+    .last-match {
+        margin-top: 20px;
+        padding: 20px;
+        background: #f8f9fa;
+        border-radius: 10px;
+        border-left: 5px solid #28a745;
+    }
+
+    .status-indicator {
+        width: 15px;
+        height: 15px;
+        border-radius: 50%;
+        display: inline-block;
+        margin-right: 10px;
+    }
+
+    .status-active {
+        background: #28a745;
+        box-shadow: 0 0 10px #28a745;
+    }
+
+    .status-connecting {
+        background: #ffc107;
+    }
+
+    .status-offline {
+        background: #dc3545;
+    }
+
+    /* CREDENCIAL INACAP */
+    .credencial-card {
+        max-width: 100%;
+        background: linear-gradient(135deg, #de4949 0%, #b82020 50%, #800000 100%);
+        border-radius: 20px;
+        padding: 30px;
+        color: white;
+        box-shadow: 0 15px 50px rgba(222, 73, 73, 0.5);
+        margin-top: 20px;
+    }
+
+    .credencial-header {
+        text-align: center;
+        font-size: 28px;
+        font-weight: 800;
+        margin-bottom: 20px;
+        text-transform: uppercase;
+        letter-spacing: 3px;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+    }
+
+    .credencial-foto {
+        width: 180px;
+        height: 180px;
+        border-radius: 15px;
+        object-fit: cover;
+        display: block;
+        margin: 0 auto 20px;
+        border: 4px solid white;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+    }
+
+    .credencial-info {
+        background: rgba(255, 255, 255, 0.18);
+        padding: 18px;
+        border-radius: 12px;
+        margin-bottom: 15px;
+        backdrop-filter: blur(12px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .credencial-info h3 {
+        margin: 0 0 15px 0;
+        font-size: 22px;
+        font-weight: 700;
+        text-align: center;
+    }
+
+    .credencial-info p {
+        margin: 8px 0;
+        font-size: 15px;
+        display: flex;
+        justify-content: space-between;
+    }
+
+    .credencial-info p strong {
+        color: white;
+    }
+
+    .credencial-info p span {
+        color: white;
+    }
+
+
+    .credencial-badge {
+        text-align: center;
+        padding: 10px;
+        background: rgba(40, 167, 69, 0.3);
+        border-radius: 8px;
+        font-weight: 600;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="recognition-container">
+    <div class="row">
+        <!-- Columna Izquierda: Feed de Cámara -->
+        <div class="col-md-8">
+            <div class="camera-feed" id="cameraFeed" style="position: relative;">
+                <!-- Indicador de conexión RTSP -->
+                <div id="streamLoading"
+                    style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; background: rgba(0,0,0,0.8); color: white; z-index: 5;">
+                    <div class="spinner-border text-light mb-3" role="status" style="width: 3rem; height: 3rem;">
+                        <span class="visually-hidden">Conectando...</span>
+                    </div>
+                    <div style="font-size: 1.1rem;">
+                        <i class="bi bi-broadcast"></i> Estableciendo conexión RTSP...
+                    </div>
+                    <div style="font-size: 0.9rem; opacity: 0.7; margin-top: 10px;">
+                        Conectando a LuckFox
+                    </div>
+                </div>
+
+                <!-- Stream de Video -->
+                <img id="streamImage" src="/luckfox/stream/" alt="LuckFox Camera Stream"
+                    style="width: 100%; height: 100%; object-fit: cover; position: absolute; top: 0; left: 0; display: none;"
+                    onload="document.getElementById('streamLoading').style.display='none'; this.style.display='block';"
+                    onerror="document.getElementById('streamLoading').innerHTML='<div class=\'p-5 text-white\'><i class=\'bi bi-exclamation-triangle-fill\'></i><br>Cámara no disponible<br><small>Verifica que LuckFox esté encendido</small></div>'">
+
+                <!-- Overlay de Estado -->
+                <div class="camera-overlay" style="z-index: 10;">
+                    <span class="status-indicator status-connecting" id="statusIndicator"></span>
+                    <span id="connectionStatus">Listo para reconocer</span>
+                </div>
+            </div>
+
+            <!-- Botones de control -->
+            <div class="mt-3" style="display: flex; justify-content: center;">
+                <div style="display: inline-flex; gap: 10px; flex-wrap: wrap; justify-content: center;">
+                    <button id="btnIniciar" onclick="iniciarReconocimiento()" class="btn btn-lg"
+                        style="background: linear-gradient(90deg, #28a745, #218838); color: white; border: none; padding: 12px 30px; border-radius: 10px; font-weight: 600;">
+                        <i class="bi bi-play-circle"></i> Iniciar Reconocimiento
+                    </button>
+                    <button id="btnDetener" onclick="detenerReconocimiento()" class="btn btn-danger btn-lg"
+                        style="padding: 12px 30px; border-radius: 10px; font-weight: 600;" disabled>
+                        <i class="bi bi-stop-circle"></i> Detener
+                    </button>
+                    <button id="btnIngresoManual" onclick="mostrarModalIngresoManual()" class="btn btn-lg"
+                        style="background: linear-gradient(90deg, #ffc107, #ff9800); color: white; border: none; padding: 12px 30px; border-radius: 10px; font-weight: 600;">
+                        <i class="bi bi-pencil-square"></i> Ingreso Manual
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Columna Derecha: Info del Evento y Últimos Registros -->
+        <div class="col-md-4">
+            <div class="event-info">
+                <h4 class="mb-3">
+                    <i class="bi bi-calendar-event text-danger"></i> {{ evento.nombre }}
+                </h4>
+                <p class="text-muted mb-1">
+                    <i class="bi bi-clock"></i> {{ evento.hora_inicio }} - {{ evento.hora_fin }}
+                </p>
+                <p class="text-muted mb-1">
+                    <i class="bi bi-geo-alt"></i> {{ evento.ubicacion }}
+                </p>
+                <p class="text-muted mb-4">
+                    <i class="bi bi-person"></i> {{ evento.relator }}
+                </p>
+
+                <hr>
+
+                <h5 class="mb-3">
+                    <i class="bi bi-person-check"></i> Último Reconocimiento
+                </h5>
+
+                <!-- Credencial INACAP (oculta por defecto) -->
+                <div id="credencialCard" class="credencial-card" style="display: none;">
+                    <div class="credencial-header">INACAP</div>
+                    <img id="credencialFoto" class="credencial-foto" src="" alt="Foto de perfil" />
+                    <div class="credencial-info">
+                        <h3 id="credencialNombre">--</h3>
+                        <p><strong>RUT:</strong> <span id="credencialRut">--</span></p>
+                        <p><strong>Carrera:</strong> <span id="credencialCarrera">--</span></p>
+                        <p><strong>Jornada:</strong> <span id="credencialJornada">--</span></p>
+                        <p><strong>Similitud:</strong> <span id="credencialSimilitud"
+                                class="text-white fw-bold">--</span>
+                        </p>
+                    </div>
+
+                    <!-- Badge de resultado (oculto inicialmente) -->
+                    <div id="credencialBadge" class="credencial-badge" style="display: none; margin-top: 15px;">
+                        <i class="bi bi-check-circle-fill"></i> Asistencia Registrada
+                    </div>
+                </div>
+
+                <!-- Estado de espera -->
+                <div id="waitingMatch" class="text-center py-5 text-muted">
+                    <i class="bi bi-person-bounding-box fs-1"></i>
+                    <p class="mt-2">Esperando rostros...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Ingreso Manual -->
+    <div class="modal fade" id="modalIngresoManual" tabindex="-1" aria-labelledby="modalIngresoManualLabel"
+        aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header" style="background: linear-gradient(90deg, #c1272d, #8b0000); color: white;">
+                    <h5 class="modal-title" id="modalIngresoManualLabel">
+                        <i class="bi bi-pencil-square"></i> Registro Manual de Asistencia
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                        aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="formIngresoManual">
+                        <div class="mb-3">
+                            <label for="inputRut" class="form-label">RUT <span class="text-danger">*</span></label>
+                            <div class="row g-2">
+                                <div class="col-9">
+                                    <input type="text" class="form-control" id="inputRut" placeholder="12345678"
+                                        required maxlength="8" pattern="[0-9]{7,8}">
+                                </div>
+                                <div class="col-3">
+                                    <input type="text" class="form-control" id="inputRutDv" placeholder="9" required
+                                        maxlength="1" pattern="[0-9Kk]" readonly>
+                                </div>
+                            </div>
+                            <small class="text-muted">El dígito verificador se calcula automáticamente. Los datos se
+                                autocompletarán al escribir el RUT.</small>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="inputNombre" class="form-label">Nombre Completo <span
+                                    class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="inputNombre" placeholder="Nombre completo"
+                                required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="inputCarrera" class="form-label">Carrera <span
+                                    class="text-danger">*</span></label>
+                            <select class="form-select" id="inputCarrera" required>
+                                <option value="">Seleccione una carrera...</option>
+                                <option value="No aplica">No aplica</option>
+                                <option value="Administración de Empresas">Administración de Empresas</option>
+                                <option value="Administración Gastronómica">Administración Gastronómica</option>
+                                <option value="Analista Programador">Analista Programador</option>
+                                <option value="Comercio Exterior">Comercio Exterior</option>
+                                <option value="Construcción Civil">Construcción Civil</option>
+                                <option value="Contabilidad General">Contabilidad General</option>
+                                <option value="Contador Público">Contador Público</option>
+                                <option value="Diseño Digital Profesional">Diseño Digital Profesional</option>
+                                <option value="Diseño Digital y Web">Diseño Digital y Web</option>
+                                <option value="Gastronomía">Gastronomía</option>
+                                <option value="Ingeniería Eléctrica">Ingeniería Eléctrica</option>
+                                <option value="Ingeniería en Administración de Empresas">Ingeniería en Administración de
+                                    Empresas</option>
+                                <option value="Ingeniería en Automatización y Robótica">Ingeniería en Automatización y
+                                    Robótica</option>
+                                <option value="Ingeniería en Ciberseguridad">Ingeniería en Ciberseguridad</option>
+                                <option value="Ingeniería en Energía">Ingeniería en Energía</option>
+                                <option value="Ingeniería en Informática">Ingeniería en Informática</option>
+                                <option value="Ingeniería en Logística">Ingeniería en Logística</option>
+                                <option value="Ingeniería en Mantenimiento de Plantas Mineras">Ingeniería en
+                                    Mantenimiento
+                                    de Plantas Mineras</option>
+                                <option value="Ingeniería en Mantenimiento Industrial">Ingeniería en Mantenimiento
+                                    Industrial</option>
+                                <option value="Ingeniería en Maquinaria Pesada y Vehículos Automotrices">Ingeniería en
+                                    Maquinaria Pesada y Vehículos Automotrices</option>
+                                <option value="Ingeniería en Mecánica y Electromovilidad Automotriz">Ingeniería en
+                                    Mecánica
+                                    y Electromovilidad Automotriz</option>
+                                <option value="Ingeniería en Metalurgia">Ingeniería en Metalurgia</option>
+                                <option value="Ingeniería en Minas">Ingeniería en Minas</option>
+                                <option value="Mecánica Automotriz en Maquinaria Pesada">Mecánica Automotriz en
+                                    Maquinaria
+                                    Pesada</option>
+                                <option value="Técnico en Automatización y Robótica">Técnico en Automatización y
+                                    Robótica
+                                </option>
+                                <option value="Técnico en Construcción">Técnico en Construcción</option>
+                                <option value="Técnico en Electricidad Industrial">Técnico en Electricidad Industrial
+                                </option>
+                                <option value="Técnico en Energías Renovables">Técnico en Energías Renovables</option>
+                                <option value="Técnico en Logística">Técnico en Logística</option>
+                                <option value="Técnico en Mantenimiento de Plantas Mineras">Técnico en Mantenimiento de
+                                    Plantas Mineras</option>
+                                <option value="Técnico en Mantenimiento Industrial">Técnico en Mantenimiento Industrial
+                                </option>
+                                <option value="Técnico en Mecánica y Electromovilidad Automotriz">Técnico en Mecánica y
+                                    Electromovilidad Automotriz</option>
+                                <option value="Técnico en Minería">Técnico en Minería</option>
+                                <option value="Técnico en Prevención de Riesgos y Gestión de Emergencias">Técnico en
+                                    Prevención de Riesgos y Gestión de Emergencias</option>
+                            </select>
+                            <small class="text-muted">Solo puede seleccionar de las opciones disponibles</small>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="inputJornada" class="form-label">Jornada/Rol <span
+                                    class="text-danger">*</span></label>
+                            <select class="form-select" id="inputJornada" required>
+                                <option value="">Seleccione...</option>
+                                <option value="Diurna">Diurna</option>
+                                <option value="Vespertina">Vespertina</option>
+                                <option value="Profesor">Profesor</option>
+                                <option value="Administrativo">Administrativo</option>
+                                <option value="Externo">Externo</option>
+                            </select>
+                        </div>
+
+                        <div id="alertaUsuarioExistente" class="alert alert-info" style="display: none;">
+                            <i class="bi bi-info-circle"></i> Usuario encontrado en el sistema
+                        </div>
+
+                        <div id="alertaUsuarioNuevo" class="alert alert-warning" style="display: none;">
+                            <i class="bi bi-exclamation-triangle"></i> Usuario no encontrado. Se creará un nuevo
+                            registro
+                            sin datos biométricos.
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-success" onclick="registrarAsistenciaManual()">
+                        <i class="bi bi-check-circle"></i> Registrar Asistencia
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endblock %}
+
+    {% block extra_js %}
+    <script>
+        let reconocimientoActivo = false;
+        let eventoId = "{{ evento.id }}";
+        let contadorIntentos = 0;
+
+        // Función para obtener el token CSRF
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+        // Función sleep
+        function sleep(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+
+        // Iniciar reconocimiento continuo
+        async function iniciarReconocimiento() {
+            if (reconocimientoActivo) {
+                console.log("⚠️ Reconocimiento ya está activo");
+                return;
+            }
+
+            reconocimientoActivo = true;
+            document.getElementById('btnIniciar').disabled = true;
+            document.getElementById('btnDetener').disabled = false;
+
+            actualizarEstado('active', 'Reconocimiento activo');
+            console.log("🚀 Reconocimiento iniciado");
+
+            // MOSTRAR el stream cuando se inicia
+            const streamImg = document.getElementById('streamImage');
+            streamImg.style.display = 'block';
+
+            while (reconocimientoActivo) {
+                try {
+                    contadorIntentos++;
+                    console.log(`\n--- Intento #${contadorIntentos} ---`);
+
+                    const formData = new FormData();
+                    formData.append('evento_id', eventoId);
+                    // solo_detectar ya no se usa en backend para saltar confirmación, 
+                    // pero lo dejamos por compatibilidad si es necesario
+
+                    const response = await fetch('/api/reconocimiento/capturar/', {
+                        method: 'POST',
+                        body: formData,
+                        headers: {
+                            'X-CSRFToken': getCookie('csrftoken')
+                        }
+                    });
+
+                    const data = await response.json();
+
+                    if (response.ok && data.success && data.match) {
+                        // ✅ MATCH CONFIRMADO POR LUCKFOX
+                        console.log(`🔍 Match confirmado: ${data.usuario.nombre} (${(data.similitud * 100).toFixed(1)}%)`);
+
+                        mostrarMatchExitoso(data);
+
+                        // Esperar un poco para que se vea el resultado antes de seguir
+                        await sleep(4000);
+
+                    } else if (data.match && !data.success) {
+                        // ❌ Match detectado pero RECHAZADO en Luckfox
+                        console.log("❌ Usuario rechazó en Luckfox");
+                        // Podríamos mostrar algo visual aquí si se desea
+                        await sleep(1000);
+
+                    } else if (data.no_face) {
+                        // ⚠️ No se detectó rostro
+                        console.log("⚠️ No se detectó rostro");
+                        mostrarNoDeteccion();
+                        await sleep(300);  // Pausa corta
+                    } else if (!data.match) {
+                        // ❌ Rostro detectado pero no reconocido
+                        console.log(`❌ Rostro no reconocido (mejor: ${(data.similitud_maxima * 100).toFixed(1)}%)`);
+                        mostrarNoReconocido(data);
+                        await sleep(800);
+                    } else {
+                        console.log("⚠️ Respuesta inesperada:", data);
+                        await sleep(500);
+                    }
+
+                } catch (error) {
+                    console.error('❌ Error:', error);
+                    actualizarEstado('offline', 'Error de conexión');
+                    await sleep(2000);
+                }
+            }
+        }
+
+        // Detener reconocimiento
+        function detenerReconocimiento() {
+            reconocimientoActivo = false;
+            document.getElementById('btnIniciar').disabled = false;
+            document.getElementById('btnDetener').disabled = true;
+
+            actualizarEstado('connecting', 'Reconocimiento detenido');
+            console.log("⏹️ Reconocimiento detenido");
+        }
+
+        // Actualizar indicador de estado
+        function actualizarEstado(estado, texto) {
+            const statusIndicator = document.getElementById('statusIndicator');
+            const statusText = document.getElementById('connectionStatus');
+
+            statusIndicator.className = 'status-indicator status-' + estado;
+            statusText.textContent = texto;
+        }
+
+        // Mostrar match exitoso (Último Reconocimiento)
+        function mostrarMatchExitoso(data) {
+            const credencialCard = document.getElementById('credencialCard');
+            const waitingMatch = document.getElementById('waitingMatch');
+
+            // Actualizar datos de la credencial
+            document.getElementById('credencialNombre').textContent = data.usuario.nombre;
+            document.getElementById('credencialRut').textContent = data.usuario.rut;
+            document.getElementById('credencialCarrera').textContent = data.usuario.carrera || '--';
+
+            // Formatear jornada
+            const jornada = data.usuario.jornada || '';
+            document.getElementById('credencialJornada').textContent = jornada === 'D' ? 'Diurna' : jornada === 'V' ? 'Vespertina' : '--';
+
+            document.getElementById('credencialSimilitud').textContent = `${(data.similitud * 100).toFixed(1)}%`;
+
+            // Actualizar foto
+            if (data.usuario.imagen) {
+                document.getElementById('credencialFoto').src = data.usuario.imagen;
+            } else {
+                document.getElementById('credencialFoto').src = 'https://via.placeholder.com/180?text=Sin+Foto';
+            }
+
+            // Mostrar badge de asistencia
+            const badgeAsistencia = document.getElementById('credencialBadge');
+            if (data.asistencia === 'registrada' || data.asistencia === 'existe') {
+                badgeAsistencia.style.background = 'rgba(40, 167, 69, 0.3)';
+                badgeAsistencia.innerHTML = '<i class="bi bi-check-circle-fill"></i> Asistencia Confirmada';
+                badgeAsistencia.style.display = 'block';
+            } else {
+                badgeAsistencia.style.display = 'none';
+            }
+
+            // Mostrar credencial, ocultar mensaje de espera
+            credencialCard.style.display = 'block';
+            waitingMatch.style.display = 'none';
+
+            // Animación de entrada
+            credencialCard.style.animation = 'slideIn 0.5s ease';
+            setTimeout(() => {
+                credencialCard.style.animation = '';
+            }, 500);
+        }
+
+
+        // Mostrar cuando no se detecta rostro
+        function mostrarNoDeteccion() {
+            const credencialCard = document.getElementById('credencialCard');
+            const waitingMatch = document.getElementById('waitingMatch');
+            const waitingIcon = waitingMatch.querySelector('i');
+            const waitingText = waitingMatch.querySelector('p');
+
+            waitingIcon.className = 'bi bi-camera-video-off-fill fs-1 text-warning';
+            waitingText.textContent = 'No se detecta rostro...';
+
+            credencialCard.style.display = 'none';
+            waitingMatch.style.display = 'block';
+        }
+
+        // Mostrar cuando no se reconoce el rostro
+        function mostrarNoReconocido(data) {
+            const credencialCard = document.getElementById('credencialCard');
+            const waitingMatch = document.getElementById('waitingMatch');
+            const waitingIcon = waitingMatch.querySelector('i');
+            const waitingText = waitingMatch.querySelector('p');
+
+            waitingIcon.className = 'bi bi-person-x-fill fs-1 text-danger';
+            waitingText.innerHTML = `Rostro no reconocido<br><small class="text-muted">Mejor coincidencia: ${(data.similitud_maxima * 100).toFixed(1)}%</small>`;
+
+            credencialCard.style.display = 'none';
+            waitingMatch.style.display = 'block';
+        }
+
+        // CSS para animaciones
+        const style = document.createElement('style');
+        style.textContent = `
+    @keyframes pulse {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.05); }
+    }
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+    @keyframes slideIn {
+        0% { 
+            transform: translateY(-30px); 
+            opacity: 0; 
+        }
+        100% { 
+            transform: translateY(0); 
+    }
+`;
+        document.head.appendChild(style);
+
+        // ========== CÁLCULO AUTOMÁTICO DE DÍGITO VERIFICADOR ==========
+
+        function calcularDV(rut) {
+            let suma = 0;
+            let multiplicador = 2;
+
+            for (let i = rut.length - 1; i >= 0; i--) {
+                suma += parseInt(rut[i]) * multiplicador;
+                multiplicador = multiplicador === 7 ? 2 : multiplicador + 1;
+            }
+
+            const resto = suma % 11;
+            const dv = 11 - resto;
+
+            if (dv === 11) return '0';
+            if (dv === 10) return 'K';
+            return dv.toString();
+        }
+
+        // Calcular DV automáticamente mientras se escribe el RUT y buscar usuario existente
+        document.addEventListener('DOMContentLoaded', function () {
+            const inputRut = document.getElementById('inputRut');
+            let rutBusquedaTimeout = null;
+
+            if (inputRut) {
+                inputRut.addEventListener('input', async function (e) {
+                    let value = e.target.value.replace(/\D/g, ''); // Solo números
+
+                    if (value.length > 8) {
+                        value = value.substring(0, 8);
+                    }
+
+                    e.target.value = value;
+
+                    // Calcular DV si tiene al menos 7 dígitos
+                    if (value.length >= 7) {
+                        const dv = calcularDV(value);
+                        document.getElementById('inputRutDv').value = dv;
+
+                        // Buscar usuario existente con debounce
+                        clearTimeout(rutBusquedaTimeout);
+                        rutBusquedaTimeout = setTimeout(async () => {
+                            const rutCompleto = `${value}-${dv}`;
+                            try {
+                                const response = await fetch(`/api/usuarios/${rutCompleto}/`);
+                                if (response.ok) {
+                                    const data = await response.json();
+                                    if (data.success && data.usuario) {
+                                        // Usuario existe - autocompletar campos
+                                        const usuario = data.usuario;
+                                        document.getElementById('inputNombre').value = usuario.nombre || '';
+                                        document.getElementById('inputCarrera').value = usuario.carrera || 'No aplica';
+                                        document.getElementById('inputJornada').value = usuario.jornada || 'Diurna';
+
+                                        // Mostrar mensaje informativo debajo del formulario
+                                        let messageDiv = document.getElementById('rutExisteMessage');
+                                        if (!messageDiv) {
+                                            messageDiv = document.createElement('div');
+                                            messageDiv.id = 'rutExisteMessage';
+                                            messageDiv.style.marginTop = '10px';
+                                            document.getElementById('formIngresoManual').appendChild(messageDiv);
+                                        }
+                                        messageDiv.innerHTML = `
+                                        <div class="alert alert-info" style="font-size: 0.9rem;">
+                                            <i class="bi bi-info-circle"></i> 
+                                            <strong>${usuario.nombre}</strong> ya está registrado. 
+                                            Los datos se han autocompletado. Puedes actualizarlos si es necesario.
+                                        </div>`;
+                                    }
+                                } else {
+                                    // Usuario no existe - limpiar mensaje
+                                    const messageDiv = document.getElementById('rutExisteMessage');
+                                    if (messageDiv) messageDiv.innerHTML = '';
+                                }
+                            } catch (error) {
+                                console.log('RUT no encontrado o error en búsqueda');
+                            }
+                        }, 500);
+                    } else {
+                        document.getElementById('inputRutDv').value = '';
+                        const messageDiv = document.getElementById('rutExisteMessage');
+                        if (messageDiv) messageDiv.innerHTML = '';
+                    }
+                });
+            }
+        });
+
+        // ========== FUNCIONES DE INGRESO MANUAL ==========
+
+        let usuarioEncontrado = null;
+
+        function mostrarModalIngresoManual() {
+            // Limpiar formulario
+            document.getElementById('formIngresoManual').reset();
+            document.getElementById('inputRutDv').value = ''; // Limpiar DV también
+            document.getElementById('alertaUsuarioExistente').style.display = 'none';
+            document.getElementById('alertaUsuarioNuevo').style.display = 'none';
+            usuarioEncontrado = null;
+
+            // Mostrar modal
+            const modal = new bootstrap.Modal(document.getElementById('modalIngresoManual'));
+            modal.show();
+        }
+
+        async function buscarUsuarioPorRut() {
+            const rutNumero = document.getElementById('inputRut').value.trim();
+            const rutDv = document.getElementById('inputRutDv').value.trim();
+
+            if (!rutNumero) {
+                alert('Por favor ingrese un RUT');
+                return;
+            }
+
+            if (!rutDv) {
+                alert('Por favor ingrese un RUT válido (mínimo 7 dígitos)');
+                return;
+            }
+
+            // Concatenar RUT completo
+            const rut = `${rutNumero}-${rutDv}`;
+            console.log('🔍 Buscando usuario con RUT:', rut);
+
+            try {
+                const url = `/api/usuarios/buscar_por_rut/?rut=${encodeURIComponent(rut)}`;
+                console.log('📡 Llamando a:', url);
+
+                const response = await fetch(url, {
+                    method: 'GET',
+                    headers: {
+                        'X-CSRFToken': getCookie('csrftoken')
+                    }
+                });
+
+                console.log('📥 Respuesta recibida:', response.status, response.statusText);
+                const data = await response.json();
+                console.log('📦 Datos:', data);
+
+                if (response.ok && data.success && data.usuario) {
+                    // Usuario encontrado - autocompletar
+                    usuarioEncontrado = data.usuario;
+                    document.getElementById('inputNombre').value = data.usuario.nombre;
+                    document.getElementById('inputCarrera').value = data.usuario.carrera || '';
+                    document.getElementById('inputJornada').value = data.usuario.jornada || '';
+
+                    document.getElementById('alertaUsuarioExistente').style.display = 'block';
+                    document.getElementById('alertaUsuarioNuevo').style.display = 'none';
+
+                    console.log('✅ Usuario encontrado:', data.usuario.nombre);
+                } else {
+                    // Usuario no encontrado
+                    usuarioEncontrado = null;
+                    document.getElementById('alertaUsuarioExistente').style.display = 'none';
+                    document.getElementById('alertaUsuarioNuevo').style.display = 'block';
+
+                    console.log('⚠️ Usuario no encontrado');
+                }
+            } catch (error) {
+                console.error('❌ Error buscando usuario:', error);
+                alert(`Error al buscar usuario: ${error.message}`);
+            }
+        }
+
+        async function registrarAsistenciaManual() {
+            const rutNumero = document.getElementById('inputRut').value.trim();
+            const rutDv = document.getElementById('inputRutDv').value.trim();
+            const nombre = document.getElementById('inputNombre').value.trim();
+            const carrera = document.getElementById('inputCarrera').value.trim();
+            const jornada = document.getElementById('inputJornada').value;
+
+            if (!rutNumero || !rutDv || !nombre || !carrera || !jornada) {
+                alert('Por favor complete todos los campos obligatorios');
+                return;
+            }
+
+            // Concatenar RUT completo
+            const rut = `${rutNumero}-${rutDv}`;
+
+            try {
+                const formData = new FormData();
+                formData.append('evento_id', eventoId);
+                formData.append('rut', rut);
+                formData.append('nombre', nombre);
+                formData.append('carrera', carrera);
+                formData.append('jornada', jornada);
+
+                const response = await fetch('/api/reconocimiento/registrar_manual/', {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-CSRFToken': getCookie('csrftoken')
+                    }
+                });
+
+                const data = await response.json();
+
+                if (response.ok && data.success) {
+                    // Cerrar modal
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('modalIngresoManual'));
+                    modal.hide();
+
+                    // Mostrar mensaje de éxito
+                    if (data.asistencia === 'registrada') {
+                        alert(`✅ Asistencia registrada exitosamente para ${nombre}`);
+                    } else if (data.asistencia === 'existe') {
+                        alert(`ℹ️ ${nombre} ya tiene asistencia registrada en este evento`);
+                    }
+
+                    // Limpiar formulario
+                    document.getElementById('formIngresoManual').reset();
+                    document.getElementById('inputRutDv').value = ''; // Limpiar DV también
+                    usuarioEncontrado = null;
+                } else {
+                    alert(`❌ Error: ${data.error || 'No se pudo registrar la asistencia'}`);
+                }
+            } catch (error) {
+                console.error('❌ Error registrando asistencia manual:', error);
+                alert('Error al registrar asistencia');
+            }
+        }
+
+        // Leer parámetro RUT de la URL y abrir modal automáticamente (desde editar usuario)
+        window.addEventListener('DOMContentLoaded', () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const rutParam = urlParams.get('rut');
+
+            if (rutParam) {
+                // Separar RUT y DV
+                const partes = rutParam.split('-');
+                if (partes.length === 2) {
+                    const rutNumero = partes[0];
+                    const rutDv = partes[1];
+
+                    // Abrir modal de ingreso manual
+                    setTimeout(() => {
+                        mostrarModalIngresoManual();
+
+                        // Prellenar campos RUT
+                        document.getElementById('inputRut').value = rutNumero;
+                        document.getElementById('inputRutDv').value = rutDv;
+
+                        // Disparar evento 'input' para activar la búsqueda automática
+                        const inputEvent = new Event('input', { bubbles: true });
+                        document.getElementById('inputRut').dispatchEvent(inputEvent);
+
+                        console.log(`✅ RUT prellenado en modal manual: ${rutParam}`);
+                    }, 500); // Esperar medio segundo para que la página cargue completamente
+                }
+            }
+        });
+
+    </script>
+    {% endblock %}

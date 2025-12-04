@@ -1,0 +1,189 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Panel Administrativo{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Eliminar padding extra del wrapper */
+    #page-content-wrapper {
+        padding: 0 !important;
+    }
+
+    /* Título banner */
+    .page-header {
+        background: linear-gradient(90deg, #de4949, #b82020, #800000);
+        color: white;
+        padding: 30px 40px;
+        margin: 0;
+        box-shadow: 0 4px 15px rgba(222, 73, 73, 0.3);
+    }
+
+    .page-header h1 {
+        margin: 0;
+        font-size: 2rem;
+        font-weight: 600;
+        color: white;
+    }
+
+    .page-header .welcome-text {
+        margin-top: 10px;
+        font-size: 1.1rem;
+        opacity: 0.9;
+        color: white;
+    }
+
+    .page-header i {
+        font-size: 1.8rem;
+        margin-right: 15px;
+        vertical-align: middle;
+    }
+
+    /* Contenido con padding */
+    .content-wrapper {
+        padding: 30px 40px;
+    }
+
+    /* Botones de acción principal */
+    .action-buttons {
+        display: flex;
+        gap: 15px;
+        flex-wrap: wrap;
+        margin-bottom: 30px;
+    }
+
+    .btn-action {
+        flex: 1;
+        min-width: 250px;
+        padding: 20px;
+        border-radius: 15px;
+        font-size: 1.1rem;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .btn-action:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+    }
+
+    .btn-train {
+        background: linear-gradient(90deg, #de4949, #b82020);
+        color: white;
+        border: none;
+    }
+
+    .btn-recognize {
+        background: linear-gradient(90deg, #28a745, #218838);
+        color: white;
+        border: none;
+    }
+
+    .btn-disabled {
+        background: linear-gradient(90deg, #6c757d, #5a6268);
+        color: white;
+        border: none;
+        cursor: not-allowed;
+    }
+
+    /* Card de evento */
+    .event-card {
+        border-radius: 15px;
+        overflow: hidden;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        border: none;
+    }
+
+    .event-card .card-header {
+        background: linear-gradient(90deg, #de4949, #b82020, #800000);
+        color: white;
+        padding: 20px;
+        font-size: 1.2rem;
+        font-weight: 600;
+    }
+
+    .event-card .card-body {
+        padding: 25px;
+        font-size: 1.1rem;
+    }
+
+    .event-status {
+        padding: 20px;
+        border-radius: 10px;
+        background: #f8f9fa;
+        margin-bottom: 20px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Título Banner -->
+<div class="page-header">
+    <h1>
+        <i class="bi bi-house-door"></i>
+        Bienvenido al Sistema de Reconocimiento Facial INACAP
+    </h1>
+    <p class="welcome-text">Utilice las opciones del menú o los botones de acción rápida para navegar por el sistema.
+    </p>
+</div>
+
+<!-- Contenido con padding -->
+<div class="content-wrapper">
+    <!-- Sección con los botones de acciones principales -->
+    <div class="action-buttons">
+        <!-- Lógica condicional para el botón de "Reconocer Usuario" -->
+        {% if evento %}
+        <!-- Si hay un evento activo, el botón está habilitado y enlaza a la vista de reconocimiento -->
+        <a href="{% url 'reconocer_usuario' evento_id=evento.id %}" class="btn btn-action btn-recognize">
+            <i class="bi bi-person-check"></i> Reconocer Usuario
+        </a>
+        {% else %}
+        <!-- Si no hay evento activo, el botón está deshabilitado -->
+        <button class="btn btn-action btn-disabled" disabled>
+            <i class="bi bi-person-check"></i> No hay evento activo
+        </button>
+        {% endif %}
+    </div>
+
+    <!-- Tarjeta (Card) que muestra el estado del evento actual -->
+    <div class="card event-card">
+        <div class="card-header">
+            <i class="bi bi-calendar-event"></i> Estado del Evento
+        </div>
+        <div class="card-body">
+            <div class="event-status">
+                <!-- Muestra el nombre del evento si existe, o un mensaje indicando que no hay evento -->
+                {% if evento %}
+                <div class="d-flex align-items-start mb-3">
+                    <i class="bi bi-check-circle-fill text-success fs-2 me-3"></i>
+                    <div>
+                        <h4 class="mb-1" style="color: #b82020;">{{ evento.nombre }}</h4>
+                        <p class="text-muted mb-2"><i class="bi bi-calendar3"></i> <strong>Fecha:</strong> {{ evento.fecha }}</p>
+                        <p class="text-muted mb-2"><i class="bi bi-clock"></i> <strong>Horario:</strong> {{ evento.hora_inicio }} - {{ evento.hora_fin }}</p>
+                        <p class="text-muted mb-2"><i class="bi bi-geo-alt"></i> <strong>Ubicación:</strong> {{ evento.ubicacion }}</p>
+                        <p class="text-muted mb-0"><i class="bi bi-person"></i> <strong>Relator:</strong> {{ evento.relator }}</p>
+                    </div>
+                </div>
+                <div class="alert alert-info mb-0">
+                    <i class="bi bi-info-circle"></i> Este evento está activo ahora. Puede iniciar el reconocimiento
+                    facial usando el botón "Reconocer Usuario" arriba.
+                </div>
+                {% else %}
+                <div class="d-flex align-items-start">
+                    <i class="bi bi-x-circle-fill text-danger fs-2 me-3"></i>
+                    <div>
+                        <h5 class="mb-2">No hay ningún evento activo en este momento.</h5>
+                        <p class="text-muted small mb-0">
+                            Los eventos se activan automáticamente cuando llega su horario programado.
+                            <br>Puede administrar eventos desde la <a href="{% url 'listar_eventos' %}">Lista de
+                                Eventos</a>.
+                        </p>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,77 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Registrar Evento{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1>Registrar Nuevo Evento</h1>
+
+    <!-- Si la vista envía un mensaje de error, se muestra aquí en una alerta -->
+    {% if error %}
+    <div class="alert alert-danger text-center">
+        {{ error }}
+    </div>
+    {% endif %}
+
+    <!-- Formulario para crear un nuevo evento. Se envía mediante el método POST. -->
+    <form method="POST">
+        <!-- Token de seguridad de Django para proteger contra ataques CSRF -->
+        {% csrf_token %}
+
+        <!-- Campo para el nombre del evento -->
+        <div class="mb-3">
+            <label for="nom_evento" class="form-label">Nombre del Evento:</label>
+            <input type="text" class="form-control" id="nom_evento" name="nom_evento"
+                placeholder="Ingrese el nombre del evento" required>
+        </div>
+
+        <!-- Campo para la fecha del evento -->
+        <div class="mb-3">
+            <label for="fecha" class="form-label">Fecha:</label>
+            <input type="date" class="form-control" id="fecha" name="fecha" required>
+        </div>
+
+        <!-- Campos para hora de inicio y fin -->
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <label for="hora_inicio" class="form-label">Hora Inicio:</label>
+                <input type="time" class="form-control" id="hora_inicio" name="hora_inicio" required>
+            </div>
+            <div class="col-md-6">
+                <label for="hora_fin" class="form-label">Hora Fin:</label>
+                <input type="time" class="form-control" id="hora_fin" name="hora_fin" required>
+            </div>
+        </div>
+
+        <!-- Campo para la ubicación -->
+        <div class="mb-3">
+            <label for="ubicacion" class="form-label">Ubicación:</label>
+            <input type="text" class="form-control" id="ubicacion" name="ubicacion"
+                placeholder="Ej. Sala A-201, Auditorio Principal" required>
+        </div>
+
+        <!-- Campo para el nombre del relator -->
+        <div class="mb-3">
+            <label for="relator" class="form-label">Relator:</label>
+            <input type="text" class="form-control" id="relator" name="relator"
+                placeholder="Ingrese el nombre del relator" required>
+        </div>
+
+        <!-- Campo para la descripción del evento -->
+        <div class="mb-3">
+            <label for="descripcion" class="form-label">Descripción:</label>
+            <textarea class="form-control" id="descripcion" name="descripcion" rows="4"
+                placeholder="Ingrese una breve descripción del evento" required></textarea>
+        </div>
+
+        <!-- Botones de acción -->
+        <div class="text-center">
+            <!-- Botón para enviar el formulario y crear el evento -->
+            <button type="submit" class="btn w-100 py-2">Crear Evento</button>
+            <!-- Enlace para volver  a la lista de eventos sin guardar cambios -->
+            <a href="{% url 'listar_eventos' %}" class="btn back-btn w-100 py-2 my-3">Volver a la Lista de Eventos</a>
+        </div>
+    </form>
+</div>
+{% endblock %}
