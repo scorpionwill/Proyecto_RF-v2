@@ -1,0 +1,91 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Registrar Usuario{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1>Registrar Nuevo Usuario</h1>
+
+    <!-- Muestra un mensaje de error si la vista lo proporciona -->
+    {% if error %}
+    <div class="alert alert-danger text-center">
+        {{ error }}
+    </div>
+    {% endif %}
+
+    <!-- Formulario para registrar un nuevo usuario -->
+    <form method="POST">
+        <!-- Token de seguridad CSRF de Django -->
+        {% csrf_token %}
+
+        <!-- Campo para el RUT, dividido en números y dígito verificador -->
+        <div class="mb-3 row">
+            <div class="col-md-8">
+                <label for="rut_numeros" class="form-label">RUT (sin dígito verificador):</label>
+                <div class="input-group">
+                    <input type="text" class="form-control" id="rut_numeros" name="rut_numeros" maxlength="8"
+                        placeholder="Ejemplo: 12345678" required>
+                    <!-- Icono que muestra el estado de validación del RUT -->
+                    <span class="input-group-text" id="rutStatusIcon" role="status" aria-live="polite"
+                        aria-label="Estado de validación del RUT">✖</span>
+                </div>
+                <div id="rutNumerosFeedback" class="invalid-feedback">
+                    El RUT ingresado no es válido.
+                </div>
+            </div>
+            <div class="col-md-4">
+                <label for="rut_dv" class="form-label">DV:</label>
+                <!-- El dígito verificador se calcula automáticamente y es de solo lectura -->
+                <input type="text" class="form-control" id="rut_dv" name="rut_dv" readonly placeholder="DV">
+            </div>
+        </div>
+
+        <!-- Campo para el nombre completo del usuario -->
+        <div class="mb-3">
+            <label for="nombre" class="form-label">Nombre Completo:</label>
+            <div class="input-group">
+                <input type="text" class="form-control" id="nombre" name="nombre"
+                    placeholder="Ingrese su nombre completo" required>
+                <!-- Icono que muestra el estado de validación del nombre -->
+                <span class="input-group-text" id="nombreStatusIcon" role="status" aria-live="polite"
+                    aria-label="Estado de validación del nombre">✖</span>
+            </div>
+            <div id="nombreFeedback" class="invalid-feedback">
+                El nombre no puede contener números.
+            </div>
+        </div>
+
+        <!-- Menú desplegable para seleccionar la carrera del usuario -->
+        <div class="mb-3">
+            <label for="carrera" class="form-label">Carrera:</label>
+            <select class="form-select" id="carrera" name="carrera" required>
+                <option value="" disabled selected>Seleccione su carrera</option>
+                <option value="Gastronomía">Gastronomía</option>
+                <option value="Mecánica">Mecánica</option>
+                <option value="Ingeniería en informática">Ingeniería en informática</option>
+                <option value="Diseño gráfico profesional">Diseño gráfico profesional</option>
+                <option value="Administración de empresa">Administración de empresa</option>
+            </select>
+        </div>
+
+        <!-- Botones de acción -->
+        <div class="text-center">
+            <button type="submit" class="btn w-100 py-2">Crear Usuario</button>
+            <a href="{% url 'pagina_inicio' %}" class="btn back-btn w-100 py-2 my-3">Volver a la página de inicio</a>
+        </div>
+    </form>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<!-- Validación de RUT y Nombre -->
+<script src="{% static 'js/rut-validation.js' %}"></script>
+<script>
+    // Inicializa las validaciones cuando el DOM esté listo
+    document.addEventListener('DOMContentLoaded', function () {
+        inicializarValidacionRUT('rut_numeros', 'rut_dv', 'rutStatusIcon');
+        inicializarValidacionNombre('nombre', 'nombreStatusIcon');
+    });
+</script>
+{% endblock %}

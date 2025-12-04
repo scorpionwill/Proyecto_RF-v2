@@ -1,0 +1,45 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+.eggs/
+dist/
+build/
+
+# Django
+*.log
+local_settings.py
+db.sqlite3
+media/
+
+# InspireFace
+*.inspireface/
+.inspireface/
+
+# Luckfox SDK (microcontroller development - executable already built)
+luckfox/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Credentials 
+firebase_credentials/
+**/firebase_credentials/
+*serviceAccountKey*.json
+
+# Temporary
+*.tmp
+*.bak
+*_backup*
+*.zip
+*.tar.gz

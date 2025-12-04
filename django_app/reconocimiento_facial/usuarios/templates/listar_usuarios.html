@@ -1,0 +1,162 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Lista de Usuarios{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Eliminar padding extra del wrapper */
+    #page-content-wrapper {
+        padding: 0 !important;
+    }
+
+    /* Título banner */
+    .page-header {
+        background: linear-gradient(90deg, #de4949, #b82020, #800000);
+        color: white;
+        padding: 30px 40px;
+        margin: 0;
+        box-shadow: 0 4px 15px rgba(222, 73, 73, 0.3);
+    }
+
+    .page-header h1 {
+        margin: 0;
+        font-size: 2rem;
+        font-weight: 600;
+        color: white;
+    }
+
+    .page-header i {
+        font-size: 1.8rem;
+        margin-right: 15px;
+        vertical-align: middle;
+    }
+
+    /* Contenido con padding */
+    .content-wrapper {
+        padding: 30px 40px;
+    }
+
+    /* Botón crear usuario */
+    .btn-create {
+        background: linear-gradient(90deg, #de4949, #b82020, #800000);
+        color: white;
+        border: none;
+        border-radius: 10px;
+        padding: 12px 25px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 10px rgba(222, 73, 73, 0.3);
+    }
+
+    .btn-create:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 6px 15px rgba(222, 73, 73, 0.4);
+        color: white;
+    }
+
+    /* Tabla moderna */
+    .table-modern {
+        border-radius: 10px;
+        overflow: hidden;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .table-modern thead {
+        background: linear-gradient(90deg, #de4949, #b82020, #800000);
+        color: white;
+    }
+
+    .table-modern tbody tr {
+        transition: all 0.3s ease;
+    }
+
+    .table-modern tbody tr:hover {
+        background-color: rgba(222, 73, 73, 0.05);
+        transform: scale(1.01);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Título Banner -->
+<div class="page-header">
+    <h1>
+        <i class="bi bi-people"></i>
+        Lista de Usuarios
+    </h1>
+</div>
+
+<!-- Contenido con padding -->
+<div class="content-wrapper">
+    <!-- Botón para navegar a la página de creación de un nuevo usuario -->
+    <a href="{% url 'crear_usuario' %}" class="btn btn-create mb-4">
+        <i class="bi bi-person-plus"></i> Crear Nuevo Usuario
+    </a>
+
+    <!-- Tabla que muestra la lista de usuarios registrados -->
+    <table class="table table-bordered table-striped table-modern">
+        <thead>
+            <tr>
+                <th>RUT</th>
+                <th>Nombre</th>
+                <th>Carrera</th>
+                <th>Jornada/Rol</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Bucle que itera sobre cada usuario pasado desde la vista -->
+            {% for usuario in usuarios %}
+            <tr>
+                <!-- Se le asigna una clase 'rut' para poder seleccionarlo con JavaScript -->
+                <td class="rut">{{ usuario.rut }}</td>
+                <td>{{ usuario.nombre }}</td>
+                <td>{{ usuario.carrera }}</td>
+                <td>
+                    {% if usuario.jornada == 'D' or usuario.jornada == 'Diurna' %}
+                    <span class="badge bg-warning text-dark">Diurna</span>
+                    {% elif usuario.jornada == 'V' or usuario.jornada == 'Vespertina' %}
+                    <span class="badge bg-primary">Vespertina</span>
+                    {% elif usuario.jornada == 'E' or usuario.jornada == 'Externa' or usuario.jornada == 'Externo' %}
+                    <span class="badge bg-dark">Externo</span>
+                    {% elif usuario.jornada == 'Profesor' %}
+                    <span class="badge bg-success">Profesor</span>
+                    {% elif usuario.jornada == 'Administrativo' %}
+                    <span class="badge bg-danger">Administrativo</span>
+                    {% else %}
+                    <span class="badge bg-secondary">{{ usuario.jornada|default:"--" }}</span>
+                    {% endif %}
+                </td>
+                <td>
+                    <!-- Botón para ver la credencial -->
+                    <a href="{% url 'ver_credencial' usuario.rut %}" class="btn btn-info btn-sm">
+                        <i class="bi bi-eye"></i> Ver
+                    </a>
+                    <!-- Botón para editar el usuario -->
+                    <a href="{% url 'editar_usuario' usuario.rut %}" class="btn btn-warning btn-sm">
+                        <i class="bi bi-pencil"></i> Editar
+                    </a>
+                </td>
+            </tr>
+            {% empty %}
+            <!-- Si no hay usuarios, muestra una fila indicándolo -->
+            <tr>
+                <td colspan="5" class="text-center">No hay usuarios registrados.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<!-- Formateo de RUT en tabla -->
+<script src="{% static 'js/rut-validation.js' %}"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        formatearRutsEnTabla('rut');
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,166 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Gestión de Usuarios{% endblock %}
+
+{% block extra_css %}
+<style>
+    #page-content-wrapper {
+        padding: 0 !important;
+    }
+
+    .page-header {
+        background: linear-gradient(90deg, #de4949, #b82020, #800000);
+        color: white;
+        padding: 30px 40px;
+        margin: 0;
+        box-shadow: 0 4px 15px rgba(222, 73, 73, 0.3);
+    }
+
+    .page-header h1 {
+        margin: 0;
+        font-size: 2rem;
+        font-weight: 600;
+        color: white;
+    }
+
+    .page-header i {
+        font-size: 1.8rem;
+        margin-right: 15px;
+        vertical-align: middle;
+    }
+
+    .content-wrapper {
+        padding: 30px 40px;
+    }
+
+    .btn-create {
+        background: linear-gradient(90deg, #de4949, #b82020);
+        color: white;
+        border: none;
+        border-radius: 10px;
+        padding: 12px 25px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 10px rgba(222, 73, 73, 0.3);
+    }
+
+    .btn-create:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 6px 15px rgba(222, 73, 73, 0.4);
+        color: white;
+    }
+
+    .table-modern {
+        border-radius: 10px;
+        overflow: hidden;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .table-modern thead {
+        background: linear-gradient(90deg, #de4949, #b82020, #800000);
+        color: white;
+    }
+
+    .table-modern tbody tr {
+        transition: all 0.3s ease;
+    }
+
+    .table-modern tbody tr:hover {
+        background-color: rgba(222, 73, 73, 0.05);
+        transform: scale(1.01);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .badge-admin {
+        background: linear-gradient(90deg, #ffc107, #ff9800);
+        color: white;
+        padding: 5px 12px;
+        border-radius: 12px;
+        font-size: 12px;
+        font-weight: 600;
+    }
+
+    .badge-encargado {
+        background: linear-gradient(90deg, #17a2b8, #138496);
+        color: white;
+        padding: 5px 12px;
+        border-radius: 12px;
+        font-size: 12px;
+        font-weight: 600;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Título Banner -->
+<div class="page-header">
+    <h1>
+        <i class="bi bi-people"></i>
+        Gestión de Usuarios del Sistema
+    </h1>
+</div>
+
+<!-- Contenido -->
+<div class="content-wrapper">
+    <!-- Botón crear -->
+    <a href="{% url 'crear_encargado' %}" class="btn btn-create mb-4">
+        <i class="bi bi-person-plus"></i> Crear Nuevo Encargado
+    </a>
+
+    <!-- Tabla -->
+    <table class="table table-bordered table-striped table-modern">
+        <thead>
+            <tr>
+                <th>Usuario</th>
+                <th>Nombre Completo</th>
+                <th>Email</th>
+                <th>Rol</th>
+                <th>Última Sesión</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for usuario in usuarios_sistema %}
+            <tr>
+                <td><strong>{{ usuario.username }}</strong></td>
+                <td>{{ usuario.get_full_name|default:"--" }}</td>
+                <td>{{ usuario.email|default:"--" }}</td>
+                <td>
+                    {% if usuario.is_staff %}
+                    <span class="badge-admin">
+                        <i class="bi bi-shield-fill-check"></i> Administrador
+                    </span>
+                    {% else %}
+                    <span class="badge-encargado">
+                        <i class="bi bi-person-badge"></i> Encargado
+                    </span>
+                    {% endif %}
+                </td>
+                <td>
+                    {% if usuario.last_login %}
+                    {{ usuario.last_login|date:"d/m/Y H:i" }}
+                    {% else %}
+                    <span class="text-muted">Nunca</span>
+                    {% endif %}
+                </td>
+                <td>
+                    {% if not usuario.is_staff %}
+                    <a href="{% url 'eliminar_encargado' usuario.id %}" class="btn btn-danger btn-sm"
+                        onclick="return confirm('¿Estás seguro de eliminar al usuario {{ usuario.username }}?')">
+                        <i class="bi bi-trash"></i> Eliminar
+                    </a>
+                    {% else %}
+                    <span class="text-muted">--</span>
+                    {% endif %}
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="6" class="text-center">No hay usuarios del sistema.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
