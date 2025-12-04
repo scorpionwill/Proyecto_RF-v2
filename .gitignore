@@ -15,11 +15,8 @@ local_settings.py
 db.sqlite3
 media/
 
-# InspireFace
-*.inspireface/
-.inspireface/
 
-# Luckfox SDK (microcontroller development - executable already built)
+# Luckfox SDK
 luckfox/
 
 # IDE
@@ -36,10 +33,3 @@ Thumbs.db
 firebase_credentials/
 **/firebase_credentials/
 *serviceAccountKey*.json
-
-# Temporary
-*.tmp
-*.bak
-*_backup*
-*.zip
-*.tar.gz
