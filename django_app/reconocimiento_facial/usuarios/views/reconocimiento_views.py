@@ -78,17 +78,14 @@ def capturar_y_reconocer(request):
         # 1. Pre-cargar usuarios para eficiencia (evitar consultas repetidas en el loop)
         usuarios_db = firebase_service.listar_usuarios()
         
-        # 2. Configuración del ciclo de reconocimiento
-        max_intentos_globales = 20
-        min_coincidencias = 2
-        coincidencias = {} # rut -> {count, data}
+        # 2. Configuración del ciclo de reconocimiento con timeout
+        import time
+        TIMEOUT_SEGUNDOS = 2.0  # Tiempo máximo por ciclo de búsqueda
         
         mejor_resultado_global = None
         match_confirmado = None
         
-        face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
-        
-        print(f"🔄 Iniciando ciclo: máx {max_intentos_globales} intentos, Single Shot > 90%")
+        print(f"🔄 Iniciando búsqueda continua (timeout: {TIMEOUT_SEGUNDOS}s)")
         
         cap = cv2.VideoCapture(RTSP_URL_HIGH, cv2.CAP_FFMPEG)
         cap.set(cv2.CAP_PROP_BUFFERSIZE, 1)
@@ -100,7 +97,11 @@ def capturar_y_reconocer(request):
             # Sincronizar buffer (mínimo)
             cap.read()
             
-            for intento in range(max_intentos_globales):
+            tiempo_inicio = time.time()
+            intento = 0
+            
+            # Loop continuo con timeout en lugar de intentos fijos
+            while (time.time() - tiempo_inicio) < TIMEOUT_SEGUNDOS:
                 # Intentar capturar y procesar un frame
                 ret, frame_temp = cap.read()
                 if not ret: 
@@ -124,6 +125,7 @@ def capturar_y_reconocer(request):
             
                 if frame is None:
                     print(f"  ⚠️ Intento {intento+1}: No se detectó rostro (InspireFace)")
+                    intento += 1
                     continue
                 
                 # Buscar match
@@ -147,6 +149,8 @@ def capturar_y_reconocer(request):
                     print(f"  ❌ Intento {intento+1}: Sin match (Mejor: {resultado.similitud:.2f})")
                     if mejor_resultado_global is None or resultado.similitud > mejor_resultado_global.similitud:
                         mejor_resultado_global = resultado
+                
+                intento += 1
                         
         finally:
             cap.release()
