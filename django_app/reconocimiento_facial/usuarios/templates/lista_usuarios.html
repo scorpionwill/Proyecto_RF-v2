@@ -76,6 +76,28 @@
     </div>
     {% endif %}
 
+    <div class="mb-3">
+        <form method="GET" class="row g-3 align-items-center">
+            <div class="col-md-6">
+                <div class="input-group">
+                    <span class="input-group-text"><i class="bi bi-search"></i></span>
+                    <input type="text" name="search" class="form-control" placeholder="Buscar por RUT o Nombre"
+                        value="{{ search_query }}" autofocus>
+                    {% if show_disabled %}
+                    <input type="hidden" name="disabled" value="true">
+                    {% endif %}
+                    <button type="submit" class="btn btn-primary">Buscar</button>
+                    {% if search_query %}
+                    <a href="{% if show_disabled %}?disabled=true{% else %}?{% endif %}"
+                        class="btn btn-outline-secondary">
+                        <i class="bi bi-x-circle"></i> Limpiar
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+        </form>
+    </div>
+
     <div class="mb-3 d-flex justify-content-between">
         <div>
             {% if show_disabled %}

@@ -69,6 +69,7 @@
                         {% if evento.estado == 'pendiente' %}<span class="badge bg-primary"><i class="bi bi-clock"></i> Pendiente</span>{% elif evento.estado == 'activo' %}<span class="badge bg-success"><i class="bi bi-check-circle"></i> Activo</span>{% else %}<span class="badge bg-secondary"><i class="bi bi-x-circle"></i> Finalizado</span>{% endif %}
                     </p>
                     <div class="btn-group" role="group">
+                        <a href="{% url 'descargar_planilla_evento' evento.id %}" class="btn btn-success btn-sm"><i class="bi bi-download"></i> Descargar Planilla</a>
                         <a href="{% url 'editar_evento' evento.id %}" class="btn btn-primary btn-sm"><i class="bi bi-pencil"></i> Editar</a>
                         <a href="{% url 'eliminar_evento' evento.id %}" class="btn btn-danger btn-sm"><i class="bi bi-trash"></i> Eliminar</a>
                     </div>

@@ -27,10 +27,27 @@ def registro_biometrico(request):
 
 @encargado_or_admin
 def listar_usuarios_web(request):
-    """Lista usuarios registrados (vista web) - filtra por estado activo/inactivo"""
+    """Lista usuarios registrados (vista web) - filtra por estado activo/inactivo y búsqueda"""
     try:
         show_disabled = request.GET.get('disabled', 'false') == 'true'
+        search_query = request.GET.get('search', '').strip()
+        
         todos_usuarios = firebase_service.listar_usuarios()
+        
+        # Filtrar por búsqueda si existe
+        if search_query:
+            search_lower = search_query.lower()
+            usuarios_filtrados = []
+            for u in todos_usuarios:
+                rut = str(u.get('rut', '')).lower()
+                nombre = str(u.get('nombre', '')).lower()
+                carrera = str(u.get('carrera', '')).lower()
+                
+                if (search_lower in rut or 
+                    search_lower in nombre or 
+                    search_lower in carrera):
+                    usuarios_filtrados.append(u)
+            todos_usuarios = usuarios_filtrados
         
         # Filtrar por estado activo/inactivo
         if show_disabled:
@@ -41,14 +58,16 @@ def listar_usuarios_web(request):
         return render(request, 'lista_usuarios.html', {
             'usuarios': usuarios,
             'total': len(usuarios),
-            'show_disabled': show_disabled
+            'show_disabled': show_disabled,
+            'search_query': search_query
         })
     except Exception as e:
         return render(request, 'lista_usuarios.html', {
             'error': str(e),
             'usuarios': [],
             'total': 0,
-            'show_disabled': False
+            'show_disabled': False,
+            'search_query': ''
         })
 
 

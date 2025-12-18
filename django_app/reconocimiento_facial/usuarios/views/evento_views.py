@@ -2,9 +2,13 @@
 
 from django.shortcuts import render, redirect
 from django.contrib import messages
+from django.http import HttpResponse
 from ..services.firebase_service import firebase_service
 from ..decorators import admin_required
 from datetime import datetime
+from openpyxl import Workbook
+from openpyxl.styles import Font, Alignment, Border, Side, PatternFill
+
 
 
 @admin_required
@@ -200,3 +204,114 @@ def eliminar_evento(request, evento_id):
         return redirect('listar_eventos')
     
     return render(request, 'confirmar_eliminar_evento.html', {'evento': evento})
+
+
+@admin_required
+def descargar_planilla_evento(request, evento_id):
+    """Descarga un archivo Excel con la lista de asistentes al evento."""
+    try:
+        # Obtener datos del evento
+        evento = firebase_service.obtener_evento(evento_id)
+        if not evento:
+            messages.error(request, "Evento no encontrado")
+            return redirect('listar_eventos')
+        
+        # Obtener asistencias del evento
+        asistencias = firebase_service.listar_asistencias(id_evento=evento_id)
+        
+        # Crear libro de Excel
+        wb = Workbook()
+        ws = wb.active
+        ws.title = "Asistentes"
+        
+        # Configurar título
+        nombre_evento = evento.get('nombre', 'Evento')
+        ws.merge_cells('A1:G1')
+        titulo_cell = ws['A1']
+        titulo_cell.value = f"Lista de Asistentes - {nombre_evento}"
+        titulo_cell.font = Font(size=14, bold=True, color="FFFFFF")
+        titulo_cell.fill = PatternFill(start_color="B82020", end_color="B82020", fill_type="solid")
+        titulo_cell.alignment = Alignment(horizontal='center', vertical='center')
+        ws.row_dimensions[1].height = 25
+        
+        # Configurar encabezados
+        encabezados = ['N°', 'RUT', 'Nombre', 'Carrera', 'Jornada', 'Fecha y Hora', 'Método']
+        ws.append(encabezados)
+        
+        # Estilo para encabezados
+        header_fill = PatternFill(start_color="DE4949", end_color="DE4949", fill_type="solid")
+        header_font = Font(bold=True, color="FFFFFF")
+        border_style = Border(
+            left=Side(style='thin'),
+            right=Side(style='thin'),
+            top=Side(style='thin'),
+            bottom=Side(style='thin')
+        )
+        
+        for col in range(1, 8):
+            cell = ws.cell(row=2, column=col)
+            cell.fill = header_fill
+            cell.font = header_font
+            cell.alignment = Alignment(horizontal='center', vertical='center')
+            cell.border = border_style
+        
+        # Agregar datos de asistencias
+        for idx, asistencia in enumerate(asistencias, start=1):
+            # Formatear fecha y hora
+            fecha_hora = asistencia.get('fecha_hora', '')
+            if 'T' in fecha_hora:
+                fecha_hora = fecha_hora.replace('T', ' ')[:19]
+            
+            # Formatear método
+            metodo = asistencia.get('metodo', 'manual')
+            metodo_texto = 'Biométrico' if metodo == 'biometrico' else 'Manual'
+            
+            # Formatear jornada
+            jornada = asistencia.get('jornada_usuario', '')
+            jornada_texto = 'Diurna' if jornada == 'D' else 'Vespertina' if jornada == 'V' else jornada
+            
+            fila = [
+                idx,
+                asistencia.get('rut_usuario', ''),
+                asistencia.get('nombre_usuario', ''),
+                asistencia.get('carrera_usuario', ''),
+                jornada_texto,
+                fecha_hora,
+                metodo_texto
+            ]
+            ws.append(fila)
+            
+            # Aplicar bordes a las celdas de datos
+            for col in range(1, 8):
+                cell = ws.cell(row=idx+2, column=col)
+                cell.border = border_style
+                if col == 1:  # N° centrado
+                    cell.alignment = Alignment(horizontal='center')
+        
+        # Ajustar ancho de columnas
+        ws.column_dimensions['A'].width = 6
+        ws.column_dimensions['B'].width = 12
+        ws.column_dimensions['C'].width = 30
+        ws.column_dimensions['D'].width = 35
+        ws.column_dimensions['E'].width = 12
+        ws.column_dimensions['F'].width = 20
+        ws.column_dimensions['G'].width = 12
+        
+        # Preparar respuesta HTTP
+        response = HttpResponse(
+            content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        )
+        
+        # Limpiar nombre del evento para usar en el archivo
+        nombre_archivo = nombre_evento.replace(' ', '_').replace('/', '-')
+        response['Content-Disposition'] = f'attachment; filename="Asistentes_{nombre_archivo}.xlsx"'
+        
+        # Guardar el libro en la respuesta
+        wb.save(response)
+        
+        return response
+        
+    except Exception as e:
+        messages.error(request, f"Error generando planilla: {e}")
+        return redirect('listar_eventos')
+

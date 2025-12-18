@@ -33,6 +33,7 @@ urlpatterns = [
     path('crear_evento/', evento_views.crear_evento, name='crear_evento'),
     path('evento/editar/<str:evento_id>/', evento_views.editar_evento, name='editar_evento'),
     path('evento/eliminar/<str:evento_id>/', evento_views.eliminar_evento, name='eliminar_evento'),
+    path('evento/<str:evento_id>/descargar_planilla/', evento_views.descargar_planilla_evento, name='descargar_planilla_evento'),
     
     # URLs de Asistencias
     path('asistencias/', asistencia_views.listar_asistencias, name='listar_asistencias'),
