@@ -26,6 +26,25 @@
 </div>
 
 <div class="content-wrapper">
+    <div class="mb-3">
+        <form method="GET" class="row g-3 align-items-center">
+            <div class="col-md-6">
+                <div class="input-group">
+                    <span class="input-group-text"><i class="bi bi-search"></i></span>
+                    <input type="text" name="search" class="form-control" placeholder="Buscar por Nombre de Evento" value="{{ search_query }}" autofocus>
+                    {% if year_selected %}<input type="hidden" name="year" value="{{ year_selected }}">{% endif %}
+                    {% if month_selected %}<input type="hidden" name="month" value="{{ month_selected }}">{% endif %}
+                    <button type="submit" class="btn btn-primary">Buscar</button>
+                    {% if search_query %}
+                    <a href="{% url 'listar_eventos' %}{% if year_selected or month_selected %}?{% if year_selected %}year={{ year_selected }}{% endif %}{% if year_selected and month_selected %}&{% endif %}{% if month_selected %}month={{ month_selected }}{% endif %}{% endif %}" class="btn btn-outline-secondary">
+                        <i class="bi bi-x-circle"></i> Limpiar
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+        </form>
+    </div>
+
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
             <form method="GET" class="row g-3 align-items-end">

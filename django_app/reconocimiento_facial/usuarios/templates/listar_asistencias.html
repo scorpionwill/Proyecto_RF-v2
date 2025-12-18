@@ -5,273 +5,132 @@
 
 {% block extra_css %}
 <style>
-    #page-content-wrapper {
-        padding: 0 !important;
-    }
-
-    .page-header {
-        background: linear-gradient(90deg, #de4949, #b82020, #800000);
-        color: white;
-        padding: 30px 40px;
-        margin: 0;
-        box-shadow: 0 4px 15px rgba(222, 73, 73, 0.3);
-    }
-
-    .page-header h1 {
-        margin: 0;
-        font-size: 2rem;
-        font-weight: 600;
-        color: white;
-    }
-
-    .page-header i {
-        font-size: 1.8rem;
-        margin-right: 15px;
-        vertical-align: middle;
-    }
-
-    .content-wrapper {
-        padding: 30px 40px;
-    }
-
-    .filter-card {
-        background: linear-gradient(90deg, #de4949, #b82020, #800000);
-        border-radius: 15px;
-        padding: 20px;
-        color: white;
-        margin-bottom: 30px;
-        box-shadow: 0 10px 30px rgba(222, 73, 73, 0.3);
-    }
-
-    .stats-card {
-        background: white;
-        border-radius: 10px;
-        padding: 20px;
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-        margin-bottom: 20px;
-    }
-
-    .stat-number {
-        font-size: 2.5rem;
-        font-weight: bold;
-        color: #de4949;
-    }
-
-    .stat-label {
-        color: #6c757d;
-        font-size: 0.9rem;
-        text-transform: uppercase;
-        letter-spacing: 1px;
-    }
-
-    .table-modern {
-        border-radius: 10px;
-        overflow: hidden;
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-    }
-
-    .table-modern thead {
-        background: linear-gradient(90deg, #de4949, #b82020, #800000);
-        color: white;
-    }
-
-    .table-modern tbody tr {
-        transition: all 0.3s ease;
-    }
-
-    .table-modern tbody tr:hover {
-        background-color: rgba(222, 73, 73, 0.05);
-        transform: scale(1.01);
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    }
-
-    .filter-select {
-        border-radius: 10px;
-        border: 2px solid rgba(255, 255, 255, 0.3);
-        padding: 10px 15px;
-        background: rgba(255, 255, 255, 0.2);
-        color: white;
-        font-weight: 500;
-    }
-
-    .filter-select option {
-        color: #333;
-        background: white;
-    }
-
-    .filter-select:focus {
-        border-color: white;
-        background: rgba(255, 255, 255, 0.3);
-        box-shadow: 0 0 0 0.2rem rgba(255, 255, 255, 0.25);
-    }
-
-    .btn-filter {
-        background: white;
-        color: #de4949;
-        border: none;
-        border-radius: 10px;
-        padding: 10px 25px;
-        font-weight: 600;
-        transition: all 0.3s ease;
-    }
-
-    .btn-filter:hover {
-        background: #f8f9fa;
-        color: #b82020;
-        transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(222, 73, 73, 0.3);
-    }
-
-    .badge-event {
-        padding: 8px 15px;
-        border-radius: 20px;
-        font-weight: 500;
-        font-size: 0.85rem;
-        background: linear-gradient(90deg, #de4949, #b82020);
-        color: white;
-    }
-
-    .empty-state {
-        text-align: center;
-        padding: 60px 20px;
-        color: #6c757d;
-    }
-
-    .empty-state i {
-        font-size: 4rem;
-        margin-bottom: 20px;
-        opacity: 0.3;
-    }
+    #page-content-wrapper { padding: 0 !important; }
+    .page-header { background: linear-gradient(90deg, #de4949, #b82020, #800000); color: white; padding: 30px 40px; margin: 0; box-shadow: 0 4px 15px rgba(222, 73, 73, 0.3); }
+    .page-header h1 { margin: 0; font-size: 2rem; font-weight: 600; color: white; }
+    .content-wrapper { padding: 30px 40px; }
+    .stats-card { background: white; border-radius: 10px; padding: 20px; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1); margin-bottom: 20px; }
+    .stat-number { font-size: 2.5rem; font-weight: bold; color: #de4949; }
+    .stat-label { color: #6c757d; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 1px; }
+    .table-modern { border-radius: 10px; overflow: hidden; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1); }
+    .table-modern thead { background: linear-gradient(90deg, #de4949, #b82020, #800000); color: white; }
+    .table-modern tbody tr { transition: all 0.3s ease; }
+    .table-modern tbody tr:hover { background-color: rgba(222, 73, 73, 0.05); transform: scale(1.01); box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); }
+    .badge-event { padding: 8px 15px; border-radius: 20px; font-weight: 500; font-size: 0.85rem; background: linear-gradient(90deg, #de4949, #b82020); color: white; }
+    .empty-state { text-align: center; padding: 60px 20px; color: #6c757d; }
+    .empty-state i { font-size: 4rem; margin-bottom: 20px; opacity: 0.3; }
 </style>
 {% endblock %}
 
 {% block content %}
 <div class="page-header">
-    <h1>
-        <i class="bi bi-clipboard-check"></i>
-        Lista de Asistencias
-    </h1>
+    <h1><i class="bi bi-clipboard-check"></i> Lista de Asistencias</h1>
 </div>
 
 <div class="content-wrapper">
-    <div class="row mb-4">
-        {% if user.is_staff %}
-        <div class="col-md-8">
-            <div class="filter-card">
-                <h5 class="mb-3">
-                    <i class="bi bi-funnel"></i> Filtrar Asistencias
-                </h5>
-                <form method="GET" class="row g-3">
-                    <div class="col-md-8">
-                        <select name="evento" class="form-select filter-select">
-                            <option value="">📋 Todos los eventos</option>
-                            {% for evento in eventos %}
-                            <option value="{{ evento.id }}" {% if evento_seleccionado == evento.id %}selected{% endif %}>
-                                {{ evento.nombre }} - {{ evento.fecha }}
-                            </option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                    <div class="col-md-4">
-                        <button type="submit" class="btn btn-filter w-100">
-                            <i class="bi bi-search"></i> Filtrar
-                        </button>
-                    </div>
-                </form>
-            </div>
-        </div>
-        <div class="col-md-4">
-            {% else %}
-            <div class="col-md-12">
-                {% endif %}
-                <div class="stats-card text-center">
-                    <div class="stat-number">{{ total_asistencias }}</div>
-                    <div class="stat-label">
-                        {% if evento_nombre %}
-                        Asistencias en {{ evento_nombre }}
-                        {% else %}
-                        Total de Asistencias
-                        {% endif %}
-                    </div>
+    <div class="mb-3">
+        <form method="GET" class="row g-3 align-items-center">
+            <div class="col-md-6">
+                <div class="input-group">
+                    <span class="input-group-text"><i class="bi bi-search"></i></span>
+                    <input type="text" name="search" class="form-control" placeholder="Buscar por Nombre de Evento" value="{{ search_query }}">
+                    {% if year_selected %}<input type="hidden" name="year" value="{{ year_selected }}">{% endif %}
+                    {% if month_selected %}<input type="hidden" name="month" value="{{ month_selected }}">{% endif %}
+                    {% if day_selected %}<input type="hidden" name="day" value="{{ day_selected }}">{% endif %}
+                    <button type="submit" class="btn btn-primary">Buscar</button>
+                    {% if search_query %}<a href="?year={{ year_selected }}&month={{ month_selected }}{% if day_selected %}&day={{ day_selected }}{% endif %}" class="btn btn-outline-secondary"><i class="bi bi-x-circle"></i> Limpiar</a>{% endif %}
                 </div>
             </div>
-        </div>
+        </form>
+    </div>
 
-        <div class="table-responsive">
-            {% if asistencias %}
-            <table class="table table-hover table-modern">
-                <thead>
-                    <tr>
-                        <th><i class="bi bi-person"></i> Usuario</th>
-                        <th><i class="bi bi-mortarboard"></i> Carrera</th>
-                        <th><i class="bi bi-clock-history"></i> Jornada/Rol</th>
-                        <th><i class="bi bi-calendar-event"></i> Evento</th>
-                        <th><i class="bi bi-person-video"></i> Método</th>
-                        <th><i class="bi bi-clock-history"></i> Fecha de Registro</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for asistencia in asistencias %}
-                    <tr>
-                        <td>
-                            <strong>{{ asistencia.nombre_usuario }}</strong>
-                            <br>
-                            <small class="text-muted">RUT: {{ asistencia.rut_usuario }}</small>
-                        </td>
-                        <td>{{ asistencia.carrera_usuario }}</td>
-                        <td>
-                            {% with jornada=asistencia.jornada_usuario %}
-                            {% if jornada == 'D' or jornada == 'Diurna' %}
-                            <span class="badge bg-warning text-dark">Diurna</span>
-                            {% elif jornada == 'V' or jornada == 'Vespertina' %}
-                            <span class="badge bg-primary">Vespertina</span>
-                            {% elif jornada == 'E' or jornada == 'Externa' or jornada == 'Externo' %}
-                            <span class="badge bg-dark">Externo</span>
-                            {% elif jornada == 'Profesor' %}
-                            <span class="badge bg-success">Profesor</span>
-                            {% elif jornada == 'Administrativo' %}
-                            <span class="badge bg-danger">Administrativo</span>
-                            {% else %}
-                            <span class="badge bg-secondary">{{ jornada|default:"--" }}</span>
-                            {% endif %}
-                            {% endwith %}
-                        </td>
-                        <td>
-                            <span class="badge-event">
-                                {{ asistencia.nombre_evento }}
-                            </span>
-                        </td>
-                        <td>
-                            {% if asistencia.metodo == 'biometrico' %}
-                            <span class="badge bg-success">
-                                <i class="bi bi-person-badge"></i> Biométrico
-                            </span>
-                            {% else %}
-                            <span class="badge bg-warning text-dark">
-                                <i class="bi bi-pencil-square"></i> Manual
-                            </span>
-                            {% endif %}
-                        </td>
-                        <td>
-                            {{ asistencia.fecha_hora }}
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-            {% else %}
-            <div class="empty-state">
-                <i class="bi bi-inbox"></i>
-                <h4>No hay asistencias registradas</h4>
-                <p class="text-muted">
-                    {% if evento_seleccionado %}
-                    No se encontraron registros para el evento seleccionado.
-                    {% else %}
-                    Aún no hay registros de asistencia en el sistema.
-                    {% endif %}
-                </p>
-            </div>
-            {% endif %}
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <form method="GET" class="row g-3 align-items-end">
+                <div class="col-md-3">
+                    <label class="form-label"><i class="bi bi-calendar3"></i> Año</label>
+                    <select name="year" class="form-select" onchange="this.form.submit()">
+                        <option value="">Todos los años</option>
+                        {% for yd in available_years %}<option value="{{ yd.year }}" {% if year_selected == yd.year|add:0 %}selected{% endif %}>{{ yd.year }} ({{ yd.count }})</option>{% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label"><i class="bi bi-calendar-month"></i> Mes</label>
+                    <select name="month" class="form-select" onchange="this.form.submit()">
+                        <option value="">Todos los meses</option>
+                        {% for mes in available_months %}<option value="{{mes.num }}" {% if month_selected == mes.num %}selected{% endif %}>{{ mes.nombre }} ({{ mes.count }})</option>{% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label"><i class="bi bi-calendar-day"></i> Día</label>
+                    <select name="day" class="form-select" onchange="this.form.submit()">
+                        <option value="">Todos los días</option>
+                        {% for day in available_days %}<option value="{{ day.day }}" {% if day_selected == day.day %}selected{% endif %}>{{ day.day }} ({{ day.count }})</option>{% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    {% if year_selected or month_selected or day_selected %}<a href="?" class="btn btn-outline-secondary"><i class="bi bi-x-circle"></i> Limpiar filtros</a>{% endif %}
+                </div>
+            </form>
         </div>
     </div>
-    {% endblock %}
+
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="stats-card text-center">
+                <div class="stat-number">{{ total_asistencias }}</div>
+                <div class="stat-label">Total de Asistencias</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="table-responsive">
+        {% if asistencias %}
+        <table class="table table-hover table-modern">
+            <thead>
+                <tr>
+                    <th><i class="bi bi-person"></i> Usuario</th>
+                    <th><i class="bi bi-mortarboard"></i> Carrera</th>
+                    <th><i class="bi bi-clock-history"></i> Jornada/Rol</th>
+                    <th><i class="bi bi-calendar-event"></i> Evento</th>
+                    <th><i class="bi bi-person-video"></i> Método</th>
+                    <th><i class="bi bi-clock-history"></i> Fecha de Registro</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for asistencia in asistencias %}
+                <tr>
+                    <td><strong>{{ asistencia.nombre_usuario }}</strong><br><small class="text-muted">RUT: {{ asistencia.rut_usuario }}</small></td>
+                    <td>{{ asistencia.carrera_usuario }}</td>
+                    <td>
+                        {% with jornada=asistencia.jornada_usuario %}
+                        {% if jornada == 'D' or jornada == 'Diurna' %}<span class="badge bg-warning text-dark">Diurna</span>
+                        {% elif jornada == 'V' or jornada == 'Vespertina' %}<span class="badge bg-primary">Vespertina</span>
+                        {% elif jornada == 'E' or jornada == 'Externa' or jornada == 'Externo' %}<span class="badge bg-dark">Externo</span>
+                        {% elif jornada == 'Profesor' %}<span class="badge bg-success">Profesor</span>
+                        {% elif jornada == 'Administrativo' %}<span class="badge bg-danger">Administrativo</span>
+                        {% else %}<span class="badge bg-secondary">{{ jornada|default:"--" }}</span>
+                        {% endif %}
+                        {% endwith %}
+                    </td>
+                    <td><span class="badge-event">{{ asistencia.nombre_evento }}</span></td>
+                    <td>
+                        {% if asistencia.metodo == 'biometrico' %}<span class="badge bg-success"><i class="bi bi-person-badge"></i> Biométrico</span>
+                        {% else %}<span class="badge bg-warning text-dark"><i class="bi bi-pencil-square"></i> Manual</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ asistencia.fecha_hora }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <div class="empty-state">
+            <i class="bi bi-inbox"></i>
+            <h4>No hay asistencias registradas</h4>
+            <p class="text-muted">No se encontraron registros para los filtros seleccionados.</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

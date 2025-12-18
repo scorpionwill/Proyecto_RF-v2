@@ -24,6 +24,14 @@ def listar_eventos(request):
         if eventos:
             print(f"🔍 DEBUG: Primer evento: {eventos[0]}")
         
+        # Obtener parámetro de búsqueda
+        search_query = request.GET.get('search', '').strip()
+        
+        # Aplicar búsqueda por nombre de evento si existe
+        if search_query:
+            search_lower = search_query.lower()
+            eventos = [e for e in eventos if search_lower in e.get('nombre', '').lower()]
+        
         # Filtros básicos en memoria (Firebase tiene limitaciones de query complejos)
         year_filter = request.GET.get('year')
         month_filter = request.GET.get('month')
@@ -121,6 +129,7 @@ def listar_eventos(request):
             'year_selected': int(year_filter) if year_filter else None,
             'month_selected': int(month_filter) if month_filter else None,
             'semestre_selected': semestre_filter,
+            'search_query': search_query
         }
         print(f"🔍 DEBUG: Context eventos length: {len(context['lista_eventos_completa'])}")
         print(f"🔍 DEBUG: Context keys: {context.keys()}")
