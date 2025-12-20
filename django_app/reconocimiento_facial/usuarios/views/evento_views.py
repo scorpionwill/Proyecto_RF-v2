@@ -1,4 +1,17 @@
-"""Vistas para gestión de eventos usando Firebase."""
+"""
+-----------------------------------------------------------------------------
+Archivo: evento_views.py
+Descripcion: Controlador CRUD para gestion de eventos academicos.
+             Permite crear, editar, eliminar y listar eventos.
+             Actualiza automaticamente el estado (pendiente/activo/finalizado)
+             segun fecha y hora. Exporta planillas de asistencia a Excel.
+Fecha de creacion: 01 de Noviembre 2025
+Fecha de modificacion: 20 de Diciembre 2025
+Autores:
+    Roberto Leal
+    William Tapia
+-----------------------------------------------------------------------------
+"""
 
 from django.shortcuts import render, redirect
 from django.contrib import messages

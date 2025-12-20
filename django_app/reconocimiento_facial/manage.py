@@ -1,9 +1,16 @@
-"""!/usr/bin/env python
-Este archivo, manage.py, es una utilidad de línea de comandos que te permite 
-interactuar con tu proyecto de Django. 
-Lo usas para ejecutar tareas administrativas como iniciar el servidor de desarrollo, 
-crear migraciones de base de datos y ejecutar pruebas."""
-"""Utilidad de línea de comandos de Django para tareas administrativas."""
+"""
+-----------------------------------------------------------------------------
+Archivo: manage.py
+Descripcion: Utilidad de linea de comandos de Django para tareas
+             administrativas. Permite iniciar servidor, crear migraciones,
+             ejecutar pruebas y otras tareas de gestion del proyecto.
+Fecha de creacion: 05 de Septiembre 2025
+Fecha de modificacion: 20 de Diciembre 2025
+Autores:
+    Roberto Leal
+    William Tapia
+-----------------------------------------------------------------------------
+"""
 import os
 import sys
 try:

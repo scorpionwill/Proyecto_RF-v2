@@ -1,6 +1,16 @@
 """
-Vista para captura de rostro con progreso en tiempo real.
-Replica el comportamiento antiguo: cámara solo activa durante captura, con progreso visible.
+-----------------------------------------------------------------------------
+Archivo: luckfox_views.py
+Descripcion: Controlador de captura biometrica y streaming de video.
+             Gestiona la captura de 100 frames para registro de usuarios,
+             extraccion de vectores faciales, transmision de stream RTSP
+             al navegador, y guardado de usuarios en Firebase.
+Fecha de creacion: 20 de Octubre 2025
+Fecha de modificacion: 20 de Diciembre 2025
+Autores:
+    Roberto Leal
+    William Tapia
+-----------------------------------------------------------------------------
 """
 import socket
 import struct

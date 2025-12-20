@@ -1,3 +1,17 @@
+"""
+-----------------------------------------------------------------------------
+Archivo: migrate_users.py
+Descripcion: Script de migracion para actualizar vectores faciales de
+             usuarios existentes. Lee imagenes de perfil desde Firebase,
+             genera nuevos vectores con InspireFace, y los actualiza
+             en la base de datos.
+Fecha de creacion: 30 de Octubre 2025
+Fecha de modificacion: 20 de Diciembre 2025
+Autores:
+    Roberto Leal
+    William Tapia
+-----------------------------------------------------------------------------
+"""
 import os
 import sys
 import cv2

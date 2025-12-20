@@ -1,3 +1,17 @@
+"""
+-----------------------------------------------------------------------------
+Archivo: urls.py
+Descripcion: Configuracion de rutas URL del modulo usuarios. Define
+             endpoints para autenticacion, gestion de usuarios, eventos,
+             asistencias, reconocimiento facial, streaming RTSP, y
+             API REST de Firebase.
+Fecha de creacion: 25 de Septiembre 2025
+Fecha de modificacion: 20 de Diciembre 2025
+Autores:
+    Roberto Leal
+    William Tapia
+-----------------------------------------------------------------------------
+"""
 from django.urls import path
 from django.contrib.auth import views as auth_views
 from .views import usuario_views, evento_views, asistencia_views, reconocimiento_views, luckfox_views, firebase_views, web_views, usuario_api_views, luckfox_stream_limpio, admin_views

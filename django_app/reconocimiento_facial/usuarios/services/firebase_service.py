@@ -1,6 +1,16 @@
 """
-Servicio de Firebase para gestionar usuarios biométricos.
-Reemplaza MySQL/Django ORM con Firebase Firestore.
+-----------------------------------------------------------------------------
+Archivo: firebase_service.py
+Descripcion: Servicio de conexion y operaciones con Firebase Firestore.
+             Implementa CRUD de usuarios, gestion de eventos, registro
+             de asistencias, y almacenamiento de vectores faciales.
+             Reemplaza MySQL/Django ORM con base de datos NoSQL en la nube.
+Fecha de creacion: 15 de Septiembre 2025
+Fecha de modificacion: 20 de Diciembre 2025
+Autores:
+    Roberto Leal
+    William Tapia
+-----------------------------------------------------------------------------
 """
 import firebase_admin
 from firebase_admin import credentials, firestore, storage

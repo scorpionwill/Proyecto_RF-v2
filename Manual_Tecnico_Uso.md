@@ -60,19 +60,19 @@ El Dashboard es el centro de mando que ofrece una vista panorámica del estado d
 ### Estructura de la Interfaz
 
 ```
-┌─────────────────────────────────────────────────────────┐
-│  🏠 INACAP - Sistema de Reconocimiento Facial           │
-├─────────────────────────────────────────────────────────┤
-│  ┌─────────┐  ┌─────────┐  ┌─────────┐  ┌─────────┐     │
+┌──────────────────────────────────────────────────────────┐
+│     INACAP - Sistema de Reconocimiento Facial            │
+├──────────────────────────────────────────────────────────┤
+│  ┌─────────┐  ┌─────────┐  ┌──────────┐  ┌─────────┐     │
 │  │ Usuarios│  │ Eventos │  │Asistencia│  │ Config  │     │
-│  │   [12]  │  │   [5]   │  │  [156]  │  │   [⚙️]  │     │
-│  └─────────┘  └─────────┘  └─────────┘  └─────────┘     │
-│                                                         │
-│  📊 Métricas de Operación                               │
-│  ├── Usuarios registrados: 12 (Total en Firestore)      │
-│  ├── Eventos activos: 1 (Requiere atención)             │
-│  └── Tasa de Éxito Biométrico: 92%                      │
-└─────────────────────────────────────────────────────────┘
+│  │   [12]  │  │   [5]   │  │  [156]   │  │         │     │
+│  └─────────┘  └─────────┘  └──────────┘  └─────────┘     │
+│                                                          │
+│     Métricas de Operación                                │
+│  ├── Usuarios registrados: 12 (Total en Firestore)       │
+│  ├── Eventos activos: 1 (Requiere atención)              │
+│  └── Tasa de Éxito Biométrico: 92%                       │
+└──────────────────────────────────────────────────────────┘
 ```
 
 ---
@@ -113,10 +113,10 @@ Este es el proceso crítico donde el motor InspireFace captura y vectoriza el ro
 
 ```
 Progreso de Captura:
-[██████████░░░░░] 65% - Mantenga el rostro firme
+65% - Mantenga el rostro firme
 ```
 
-✅ **Éxito:** El estado del usuario cambia a "Enrolado" y se muestra la foto de perfil generada.
+  **Éxito:** El estado del usuario cambia a "Enrolado" y se muestra la foto de perfil generada.
 
 ---
 
@@ -132,9 +132,9 @@ Definir: Título, Expositor, Ubicación y Horario (Inicio/Fin).
 
 | Estado | Significado |
 |--------|-------------|
-| 🟡 **Pendiente** | Fecha futura |
-| 🟢 **Activo** | Fecha/Hora actual coincide. Solo los eventos activos permiten marcar asistencia |
-| ⚫ **Finalizado** | Fecha pasada |
+| **Pendiente** | Fecha futura |
+| **Activo** | Fecha/Hora actual coincide. Solo los eventos activos permiten marcar asistencia |
+| **Finalizado** | Fecha pasada |
 
 ---
 
@@ -179,7 +179,7 @@ Cuando el servidor detecta un rostro, envía una señal TCP al puerto 8081 de la
 │    Ingeniería en Informática        │
 │                                     │
 ├──────────────────┬──────────────────┤
-│    ❌ RECHAZAR   │    ✅ ACEPTAR    │
+│     RECHAZAR     │    ACEPTAR       │
 └──────────────────┴──────────────────┘
 ```
 
@@ -187,8 +187,8 @@ Cuando el servidor detecta un rostro, envía una señal TCP al puerto 8081 de la
 
 | Botón | Acción | Resultado |
 |-------|--------|-----------|
-| ✅ **ACEPTAR** | El usuario confirma que los datos son correctos | Asistencia guardada, pantalla muestra borde VERDE |
-| ❌ **RECHAZAR** | El usuario indica error | No se guarda asistencia, pantalla muestra borde ROJO |
+| **ACEPTAR** | El usuario confirma que los datos son correctos | Asistencia guardada, pantalla muestra borde VERDE |
+| **RECHAZAR** | El usuario indica error | No se guarda asistencia, pantalla muestra borde ROJO |
 
 **Tiempo de Espera:** 30 segundos. Si no hay interacción, se descarta.
 

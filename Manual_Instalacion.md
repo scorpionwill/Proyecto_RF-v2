@@ -30,13 +30,13 @@ Este documento detalla el procedimiento técnico para el despliegue del sistema 
 |------------|---------------------------|-------|
 | **PC Maestro / Servidor** | Intel Core i5, 8GB RAM, Ubuntu 22.04 | Procesa IA y corre Django |
 | **Dispositivo de Borde** | Luckfox Pico Ultra W | Ejecuta captura RTSP y UI |
-| **Cámara** | Sensor SC3336 (3MP) | Conexión MIPI CSI a Luckfox |
-| **Pantalla** | LCD 4.0" (480x480) | Interfaz SPI/RGB |
+| **Cámara** | Sensor MIS5001 (5MP) | Conexión MIPI CSI a Luckfox |
+| **Pantalla** | LCD 4.0" LF40-480x480-ARK | Interfaz SPI/RGB |
 | **Red** | Router Wi-Fi dedicado | IP Estática recomendada |
 
 ### 1.2 Software Base
 
-- **Sistema Operativo Servidor:** Ubuntu 22.04 LTS
+- **Sistema Operativo Servidor:** Ubuntu 20.04 LTS
 - **Lenguaje:** Python 3.10
 - **SDK Biometría:** InspireFace (Librerías compartidas y modelos)
 - **Compilador (Luckfox):** Buildroot / SDK Rockchip (si se requiere recompilar C++)
@@ -74,7 +74,7 @@ pip install -r requirements.txt
 
 ### 2.4 Configurar SDK InspireFace
 
-> ⚠️ **Importante:** El motor de reconocimiento requiere archivos binarios que no se incluyen en el repositorio por tamaño/licencia.
+> **Importante:** El motor de reconocimiento requiere archivos binarios que no se incluyen en el repositorio por tamaño/licencia.
 
 1. Crear carpeta de recursos:
 
@@ -100,7 +100,7 @@ mkdir -p reconocimiento_facial/core/models
 
 ### 3.2 Descargar Credenciales de Servicio
 
-1. Ir a **Configuración del proyecto** (⚙️) > **Cuentas de servicio**.
+1. Ir a **Configuración del proyecto** > **Cuentas de servicio**.
 2. Click en **Generar nueva clave privada**.
 3. Se descargará un archivo `.json`. Renómbralo a `serviceAccountKey.json`.
 
@@ -206,7 +206,7 @@ Se ha integrado un módulo de reportabilidad avanzado en la vista "Lista de Asis
 
 ### 6.3 Mejoras de UI/UX
 
-- Indicadores visuales de estado (Badges) actualizados a paleta de colores corporativa.
+- Indicadores visuales de estado actualizados a paleta de colores corporativa.
 - Optimización de la columna "Biometría": Indica estado de vector ("Enrolado/Pendiente") en lugar de datos crudos.
 
 ---

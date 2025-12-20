@@ -1,4 +1,17 @@
-"""Vistas para reconocimiento facial en Django"""
+"""
+-----------------------------------------------------------------------------
+Archivo: reconocimiento_views.py
+Descripcion: Controlador principal de reconocimiento facial en tiempo real.
+             Captura frames del stream RTSP, detecta rostros con InspireFace,
+             busca coincidencias en Firebase, envia credenciales a Luckfox,
+             y registra asistencias confirmadas por el usuario.
+Fecha de creacion: 25 de Octubre 2025
+Fecha de modificacion: 20 de Diciembre 2025
+Autores:
+    Roberto Leal
+    William Tapia
+-----------------------------------------------------------------------------
+"""
 
 from django.shortcuts import render, redirect
 from django.http import JsonResponse

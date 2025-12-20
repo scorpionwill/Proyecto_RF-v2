@@ -1,4 +1,17 @@
-"""Vistas para gestión de asistencias usando Firebase."""
+"""
+-----------------------------------------------------------------------------
+Archivo: asistencia_views.py
+Descripcion: Controlador de visualizacion de asistencias y dashboard
+             estadistico. Lista asistencias con filtros por evento,
+             jornada y carrera. Genera datos para graficos Chart.js
+             (distribucion por carrera y jornada/rol).
+Fecha de creacion: 01 de Diciembre 2025
+Fecha de modificacion: 20 de Diciembre 2025
+Autores:
+    Roberto Leal
+    William Tapia
+-----------------------------------------------------------------------------
+"""
 
 from django.shortcuts import render
 from django.contrib import messages

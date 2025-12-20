@@ -1,5 +1,16 @@
 """
-Vistas para gestionar usuarios usando Firebase como base de datos.
+-----------------------------------------------------------------------------
+Archivo: firebase_views.py
+Descripcion: Controlador de API REST para operaciones CRUD de usuarios.
+             Expone endpoints para listar, obtener, actualizar y eliminar
+             usuarios en Firebase Firestore. Utilizado por el frontend
+             JavaScript para operaciones asincronas.
+Fecha de creacion: 15 de Noviembre 2025
+Fecha de modificacion: 20 de Diciembre 2025
+Autores:
+    Roberto Leal
+    William Tapia
+-----------------------------------------------------------------------------
 """
 from django.http import JsonResponse
 from django.views.decorators.http import require_http_methods

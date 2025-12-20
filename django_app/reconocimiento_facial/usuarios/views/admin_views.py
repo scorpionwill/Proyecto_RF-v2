@@ -1,4 +1,17 @@
-"""Vistas para administración del sistema (gestión de usuarios Encargados)."""
+"""
+-----------------------------------------------------------------------------
+Archivo: admin_views.py
+Descripcion: Controlador de administracion del sistema. Gestiona usuarios
+             tipo Encargado (creacion, listado, eliminacion). Implementa
+             validacion de contrasenas seguras y control de permisos
+             exclusivo para administradores.
+Fecha de creacion: 20 de Noviembre 2025
+Fecha de modificacion: 20 de Diciembre 2025
+Autores:
+    Roberto Leal
+    William Tapia
+-----------------------------------------------------------------------------
+"""
 
 from django.shortcuts import render, redirect
 from django.contrib import messages

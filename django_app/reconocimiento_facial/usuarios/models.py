@@ -1,3 +1,16 @@
+"""
+-----------------------------------------------------------------------------
+Archivo: models.py
+Descripcion: Modelos Django para el sistema de reconocimiento facial.
+             Define las entidades Usuario, Evento y Asistencia con sus
+             campos y relaciones. Utilizado para migraciones y admin.
+Fecha de creacion: 08 de Septiembre 2025
+Fecha de modificacion: 20 de Diciembre 2025
+Autores:
+    Roberto Leal
+    William Tapia
+-----------------------------------------------------------------------------
+"""
 from django.db import models
 
 

@@ -1,21 +1,39 @@
-# Core dependencies
+# =============================================================================
+# Archivo: requirements.txt
+# Descripcion: Dependencias del proyecto de reconocimiento facial.
+#              Instalar con: pip install -r requirements.txt
+# Fecha de creacion: 10 de Septiembre 2025
+# Fecha de modificacion: 20 de Diciembre 2025
+# Autores: Roberto Leal, William Tapia
+# =============================================================================
+
+# Framework web principal
 django==4.2.26
 
-# OpenCV and image processing
+# Procesamiento de imagenes y video (OpenCV)
 opencv-contrib-python==4.12.0.88
 
-# Database
+# Conector de base de datos MySQL (legacy)
 mysql-connector-python==9.0.0
 
-# Security and cryptography
+# Seguridad y criptografia
 cryptography==46.0.3
 pyopenssl==25.3.0
 
-# Firebase
+# Firebase - Base de datos NoSQL en la nube
 firebase-admin==6.9.0
 
-# Deep Learning / Face Recognition
+# Motor de reconocimiento facial (InspireFace SDK)
 inspireface
 
-# Excel generation
+# Calculos numericos y operaciones con vectores
+numpy
+
+# Generacion de archivos Excel para reportes
 openpyxl==3.1.2
+
+# Procesamiento de imagenes con Python
+pillow
+
+# Compatibilidad de zonas horarias (Python < 3.9)
+backports.zoneinfo

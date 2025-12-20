@@ -1,4 +1,17 @@
-"""Vistas para gestión de usuarios."""
+"""
+-----------------------------------------------------------------------------
+Archivo: usuario_views.py
+Descripcion: Controlador de gestion de usuarios registrados. Proporciona
+             listado de usuarios, redireccion a registro biometrico,
+             edicion de datos personales, y visualizacion de credenciales
+             digitales con foto y datos del alumno.
+Fecha de creacion: 05 de Noviembre 2025
+Fecha de modificacion: 20 de Diciembre 2025
+Autores:
+    Roberto Leal
+    William Tapia
+-----------------------------------------------------------------------------
+"""
 
 from django.shortcuts import render, redirect
 from django.http import JsonResponse

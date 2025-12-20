@@ -1,3 +1,17 @@
+"""
+-----------------------------------------------------------------------------
+Archivo: inspireface_service.py
+Descripcion: Servicio singleton para el SDK InspireFace. Proporciona
+             deteccion de rostros, extraccion de vectores faciales de
+             512 dimensiones, y evaluacion de calidad de imagen.
+             Actua como interfaz entre Django y el motor de IA biometrico.
+Fecha de creacion: 05 de Octubre 2025
+Fecha de modificacion: 20 de Diciembre 2025
+Autores:
+    Roberto Leal
+    William Tapia
+-----------------------------------------------------------------------------
+"""
 import inspireface as isf
 import cv2
 import numpy as np

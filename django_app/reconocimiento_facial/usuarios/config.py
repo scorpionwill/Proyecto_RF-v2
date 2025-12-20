@@ -1,6 +1,16 @@
 """
-Constantes de configuración para el sistema de reconocimiento facial.
-Ubicación centralizada para todos los valores de configuración.
+-----------------------------------------------------------------------------
+Archivo: config.py
+Descripcion: Define las constantes de configuracion para el sistema de
+             reconocimiento facial. Incluye configuracion de camara RTSP,
+             umbrales de similitud, tiempos de espera, y parametros de
+             procesamiento de video e imagenes.
+Fecha de creacion: 10 de Septiembre 2025
+Fecha de modificacion: 20 de Diciembre 2025
+Autores:
+    Roberto Leal
+    William Tapia
+-----------------------------------------------------------------------------
 """
 
 # ==========================================

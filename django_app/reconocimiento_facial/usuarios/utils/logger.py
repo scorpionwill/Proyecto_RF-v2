@@ -1,6 +1,16 @@
 """
-Utilidades de logging para el sistema de reconocimiento facial.
-Proporciona logging consistente y formateado en toda la aplicación.
+-----------------------------------------------------------------------------
+Archivo: logger.py
+Descripcion: Utilidades de logging centralizado para el sistema.
+             Proporciona metodos para registrar mensajes informativos,
+             de exito, advertencia, error, y mensajes especificos para
+             camara, red, reconocimiento y almacenamiento.
+Fecha de creacion: 05 de Diciembre 2025
+Fecha de modificacion: 20 de Diciembre 2025
+Autores:
+    Roberto Leal
+    William Tapia
+-----------------------------------------------------------------------------
 """
 from typing import Optional
 from .. import config

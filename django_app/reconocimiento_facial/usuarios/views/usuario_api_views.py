@@ -1,4 +1,16 @@
-"""Vistas API para gestión de usuarios en Firebase"""
+"""
+-----------------------------------------------------------------------------
+Archivo: usuario_api_views.py
+Descripcion: API REST para operaciones de usuario. Expone endpoints para
+             actualizar foto de perfil y buscar usuarios por RUT desde
+             el frontend JavaScript.
+Fecha de creacion: 25 de Noviembre 2025
+Fecha de modificacion: 20 de Diciembre 2025
+Autores:
+    Roberto Leal
+    William Tapia
+-----------------------------------------------------------------------------
+"""
 
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt

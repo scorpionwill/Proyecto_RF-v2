@@ -1,3 +1,17 @@
+"""
+-----------------------------------------------------------------------------
+Archivo: luckfox_client.py
+Descripcion: Cliente TCP para comunicacion con el dispositivo Luckfox Pico.
+             Genera imagenes de credencial con foto y datos del usuario,
+             las envia por socket al puerto 8081, y recibe confirmacion
+             de aceptacion o rechazo desde la pantalla tactil.
+Fecha de creacion: 15 de Octubre 2025
+Fecha de modificacion: 20 de Diciembre 2025
+Autores:
+    Roberto Leal
+    William Tapia
+-----------------------------------------------------------------------------
+"""
 import socket
 import struct
 from PIL import Image

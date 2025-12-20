@@ -1,3 +1,16 @@
+"""
+-----------------------------------------------------------------------------
+Archivo: apps.py
+Descripcion: Configuracion de la aplicacion Django 'usuarios'.
+             Define metadatos de la aplicacion como nombre y tipo
+             de campo de clave primaria por defecto.
+Fecha de creacion: 05 de Septiembre 2025
+Fecha de modificacion: 20 de Diciembre 2025
+Autores:
+    Roberto Leal
+    William Tapia
+-----------------------------------------------------------------------------
+"""
 from django.apps import AppConfig
 
 # Este archivo contiene la configuración de la aplicación 'usuarios'.

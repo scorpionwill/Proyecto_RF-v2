@@ -1,6 +1,16 @@
 """
-Servicio para matching biométrico de vectores faciales.
-Maneja comparación de rostros, cálculo de similitud y matching de usuarios.
+-----------------------------------------------------------------------------
+Archivo: matching_service.py
+Descripcion: Servicio de matching biometrico para comparacion de vectores
+             faciales. Implementa calculo de similitud coseno, distancia
+             euclidiana, busqueda de coincidencias en la base de datos,
+             y verificacion 1:1 de usuarios registrados.
+Fecha de creacion: 10 de Octubre 2025
+Fecha de modificacion: 20 de Diciembre 2025
+Autores:
+    Roberto Leal
+    William Tapia
+-----------------------------------------------------------------------------
 """
 from typing import List, Dict, Optional, Any
 from dataclasses import dataclass

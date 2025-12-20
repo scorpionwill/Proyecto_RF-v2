@@ -1,5 +1,16 @@
 """
-Vista para renderizar el formulario de registro biométrico.
+-----------------------------------------------------------------------------
+Archivo: web_views.py
+Descripcion: Controlador de vistas web principales. Renderiza la pagina
+             de inicio con evento activo, formulario de registro biometrico,
+             listado de usuarios con busqueda, y habilitacion/deshabilitacion
+             de usuarios en el sistema.
+Fecha de creacion: 10 de Noviembre 2025
+Fecha de modificacion: 20 de Diciembre 2025
+Autores:
+    Roberto Leal
+    William Tapia
+-----------------------------------------------------------------------------
 """
 from django.shortcuts import render
 from django.http import JsonResponse

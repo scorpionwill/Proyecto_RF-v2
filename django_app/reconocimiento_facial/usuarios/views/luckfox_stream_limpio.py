@@ -1,4 +1,16 @@
-"""Stream RTSP limpio SIN detección facial para captura de foto de perfil."""
+"""
+-----------------------------------------------------------------------------
+Archivo: luckfox_stream_limpio.py
+Descripcion: Stream RTSP sin deteccion facial para captura de foto de
+             perfil. Transmite video limpio sin recuadros de deteccion
+             para obtener imagenes de alta calidad.
+Fecha de creacion: 08 de Diciembre 2025
+Fecha de modificacion: 20 de Diciembre 2025
+Autores:
+    Roberto Leal
+    William Tapia
+-----------------------------------------------------------------------------
+"""
 
 from django.http import StreamingHttpResponse
 import cv2
