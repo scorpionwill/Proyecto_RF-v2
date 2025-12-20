@@ -1,68 +1,60 @@
-# **MANUAL DE INSTALACIÓN**
-# **Sistema de Reconocimiento Facial INACAP**
+# Manual de Instalación
+## Sistema de Control de Acceso con Reconocimiento Facial - INACAP
+
+![Version](https://img.shields.io/badge/version-1.1.0-blue.svg)
+![Python](https://img.shields.io/badge/Python-3.10-yellow.svg)
+![Django](https://img.shields.io/badge/Django-4.2-green.svg)
+![Hardware](https://img.shields.io/badge/Hardware-Luckfox%20Pico%20Ultra%20W-orange.svg)
 
 ---
 
-**Versión:** 1.0  
-**Fecha:** Diciembre 2024
+Este documento detalla el procedimiento técnico para el despliegue del sistema de reconocimiento facial, incluyendo la configuración del servidor backend (PC Maestro), la base de datos (Firebase) y el dispositivo de borde (Luckfox Pico).
 
----
-
-## **ÍNDICE**
+## Índice
 
 1. [Requisitos Previos](#1-requisitos-previos)
-2. [Instalación del Servidor](#2-instalación-del-servidor)
+2. [Instalación del Servidor (Backend)](#2-instalación-del-servidor-backend)
 3. [Configuración de Firebase](#3-configuración-de-firebase)
-4. [Configuración de la Cámara IP](#4-configuración-de-la-cámara-ip)
-5. [Despliegue en Luckfox Pico](#5-despliegue-en-luckfox-pico)
-6. [Verificación de la Instalación](#6-verificación-de-la-instalación)
+4. [Despliegue en Luckfox Pico (Edge)](#4-despliegue-en-luckfox-pico-edge)
+5. [Ejecución y Verificación](#5-ejecución-y-verificación)
+6. [Nuevas Funcionalidades v1.1](#6-nuevas-funcionalidades-v11)
 7. [Solución de Problemas](#7-solución-de-problemas)
 
 ---
 
-## **1. REQUISITOS PREVIOS**
+## 1. Requisitos Previos
 
-### 1.1 Hardware Requerido
+### 1.1 Hardware
 
-| Componente | Especificación Mínima |
-|------------|----------------------|
-| PC/Servidor | Intel Core i5, 4GB RAM, 10GB SSD |
-| Cámara IP | Soporte RTSP, 720p mínimo |
-| Luckfox Pico | Con pantalla LCD y panel táctil |
-| Red | Switch/Router con puertos libres |
-| Cables | Ethernet Cat5e o superior |
+| Componente | Especificación Recomendada | Notas |
+|------------|---------------------------|-------|
+| **PC Maestro / Servidor** | Intel Core i5, 8GB RAM, Ubuntu 22.04 | Procesa IA y corre Django |
+| **Dispositivo de Borde** | Luckfox Pico Ultra W | Ejecuta captura RTSP y UI |
+| **Cámara** | Sensor SC3336 (3MP) | Conexión MIPI CSI a Luckfox |
+| **Pantalla** | LCD 4.0" (480x480) | Interfaz SPI/RGB |
+| **Red** | Router Wi-Fi dedicado | IP Estática recomendada |
 
-### 1.2 Software Requerido
+### 1.2 Software Base
 
-- **Sistema Operativo:** Ubuntu 20.04 LTS o superior
-- **Python:** 3.10 o superior
-- **Git:** Para clonar el repositorio
+- **Sistema Operativo Servidor:** Ubuntu 22.04 LTS
+- **Lenguaje:** Python 3.10
+- **SDK Biometría:** InspireFace (Librerías compartidas y modelos)
+- **Compilador (Luckfox):** Buildroot / SDK Rockchip (si se requiere recompilar C++)
 
 ---
 
-## **2. INSTALACIÓN DEL SERVIDOR**
+## 2. Instalación del Servidor (Backend)
 
-### 2.1 Actualizar el Sistema
+### 2.1 Preparar el Sistema Operativo
+
+Actualizar repositorios e instalar dependencias de sistema necesarias para OpenCV y compilación:
 
 ```bash
 sudo apt update && sudo apt upgrade -y
+sudo apt install -y python3.10 python3.10-venv python3-pip git ffmpeg libgl1-mesa-glx libglib2.0-0 cmake build-essential
 ```
 
-### 2.2 Instalar Dependencias del Sistema
-
-```bash
-sudo apt install -y \
-    python3.10 \
-    python3.10-venv \
-    python3-pip \
-    git \
-    ffmpeg \
-    libgl1-mesa-glx \
-    libglib2.0-0 \
-    fonts-dejavu-core
-```
-
-### 2.3 Clonar el Proyecto
+### 2.2 Clonar el Repositorio
 
 ```bash
 cd ~
@@ -70,175 +62,177 @@ git clone <URL_DEL_REPOSITORIO> Proyecto_RF
 cd Proyecto_RF
 ```
 
-> **Nota:** Si tienes el proyecto comprimido:
-> ```bash
-> tar -xzf Proyecto_RF.tar.gz
-> ```
-
-### 2.4 Crear Entorno Virtual
+### 2.3 Configurar Entorno Virtual Python
 
 ```bash
-cd django_app/reconocimiento_facial
+cd django_app
 python3 -m venv venv
 source venv/bin/activate
-```
-
-### 2.5 Instalar Dependencias Python
-
-```bash
 pip install --upgrade pip
 pip install -r requirements.txt
 ```
 
-### 2.6 Verificar InspireFace
+### 2.4 Configurar SDK InspireFace
+
+> ⚠️ **Importante:** El motor de reconocimiento requiere archivos binarios que no se incluyen en el repositorio por tamaño/licencia.
+
+1. Crear carpeta de recursos:
 
 ```bash
-python3 -c "import inspireface; print('InspireFace OK')"
+mkdir -p reconocimiento_facial/core/libs
+mkdir -p reconocimiento_facial/core/models
 ```
+
+2. Copiar `libInspireFace.so` en `core/libs/`.
+3. Copiar los archivos de modelos (`.pack`, etc.) en `core/models/`.
 
 ---
 
-## **3. CONFIGURACIÓN DE FIREBASE**
+## 3. Configuración de Firebase
 
-### 3.1 Crear Proyecto en Firebase
+### 3.1 Crear Proyecto y Firestore
 
-1. Ir a [Firebase Console](https://console.firebase.google.com)
-2. Click en **"Agregar proyecto"**
-3. Nombre: `reconocimiento-facial-inacap`
-4. Click en **"Crear proyecto"**
+1. Ir a [Firebase Console](https://console.firebase.google.com).
+2. Crear proyecto: `reconocimiento-facial-inacap`.
+3. Ir a **Firestore Database** > **Crear base de datos**.
+4. Seleccionar ubicación: `santiago (southamerica-west1)` o `us-central1`.
+5. Reglas de seguridad: Configurar temporalmente en modo test o definir reglas de acceso.
 
-### 3.2 Habilitar Firestore Database
+### 3.2 Descargar Credenciales de Servicio
 
-1. Menú lateral → **"Firestore Database"**
-2. Click en **"Crear base de datos"**
-3. Seleccionar **"Modo de producción"**
-4. Elegir ubicación: `us-central1`
+1. Ir a **Configuración del proyecto** (⚙️) > **Cuentas de servicio**.
+2. Click en **Generar nueva clave privada**.
+3. Se descargará un archivo `.json`. Renómbralo a `serviceAccountKey.json`.
 
-### 3.3 Generar Credenciales
-
-1. Ir a **Configuración del proyecto** (⚙️)
-2. Pestaña **"Cuentas de servicio"**
-3. Click en **"Generar nueva clave privada"**
-4. Guardar el archivo JSON
-
-### 3.4 Instalar Credenciales
+### 3.3 Instalar Credenciales en Django
 
 ```bash
 mkdir -p ~/Proyecto_RF/django_app/firebase_credentials
-cp ~/Descargas/tu-proyecto-firebase-adminsdk-xxxxx.json \
-   ~/Proyecto_RF/django_app/firebase_credentials/serviceAccountKey.json
+# Mover el archivo descargado
+mv ~/Descargas/serviceAccountKey.json ~/Proyecto_RF/django_app/firebase_credentials/
 ```
 
 ---
 
-## **4. CONFIGURACIÓN DE LA CÁMARA IP**
+## 4. Despliegue en Luckfox Pico (Edge)
 
-### 4.1 Configurar IP Estática
+El dispositivo Luckfox actúa como **Servidor RTSP** (Video) y **Cliente TCP** (Pantalla).
 
-En la interfaz web de la cámara:
-- **IP:** 172.32.0.93
-- **Máscara:** 255.255.255.0
-- **Gateway:** 172.32.0.1
+### 4.1 Conexión de Hardware
 
-### 4.2 Habilitar Stream RTSP
+- **Cámara:** Conectar cinta MIPI CSI (asegurar orientación de pines).
+- **Pantalla:** Conectar pines SPI según diagrama de pines del fabricante.
+- **Red:** Conectar cable Ethernet o configurar `wpa_supplicant` para Wi-Fi.
 
-- **Stream principal:** `rtsp://172.32.0.93/live/0` (1080p)
-- **Stream secundario:** `rtsp://172.32.0.93/live/1` (720p)
+### 4.2 Transferencia de Binarios
 
-### 4.3 Verificar Conectividad
+Asumiendo que la Luckfox tiene la IP `172.32.0.93` y usuario `root`:
 
 ```bash
-ping -c 3 172.32.0.93
-ffplay rtsp://172.32.0.93/live/0
-```
+# Desde el PC Maestro
+cd ~/Proyecto_RF/luckfox_firmware/build
 
----
-
-## **5. DESPLIEGUE EN LUCKFOX PICO**
-
-### 5.1 Conexión Física
-
-1. Conectar pantalla LCD al puerto SPI
-2. Conectar panel táctil al puerto I2C
-3. Conectar cable Ethernet
-4. Conectar alimentación USB-C
-
-### 5.2 Transferir Archivos
-
-```bash
-cd ~/luckfox_ui_rebuild
+# Enviar ejecutable principal
 scp Luckfox_RF root@172.32.0.93:/root/
-scp *.jpg root@172.32.0.93:/root/
+
+# Enviar recursos de interfaz (imágenes de espera, iconos)
+scp assets/*.jpg root@172.32.0.93:/root/
 ```
 
-### 5.3 Configurar y Ejecutar
+### 4.3 Ejecución en el Dispositivo
+
+Conectarse por SSH a la placa:
 
 ```bash
 ssh root@172.32.0.93
 chmod +x /root/Luckfox_RF
+
+# Ejecutar aplicación
 ./Luckfox_RF
 ```
 
-Salida esperada:
+**Salida esperada:**
 ```
-=== Luckfox UI Start ===
-Server ready on port 8081
+RTSP Server started at rtsp://172.32.0.93/live/0
+TCP Listening on port 8081
 ```
 
 ---
 
-## **6. VERIFICACIÓN DE LA INSTALACIÓN**
+## 5. Ejecución y Verificación
 
-### 6.1 Iniciar el Servidor
+### 5.1 Iniciar Servidor Django
+
+En el PC Maestro:
 
 ```bash
-cd ~/Proyecto_RF/django_app/reconocimiento_facial
+cd ~/Proyecto_RF/django_app
 source venv/bin/activate
+
+# Migrar base de datos local (usuarios admin)
+python3 manage.py migrate
+
+# Iniciar servidor (asegurar estar en la misma red que la Luckfox)
 python3 manage.py runserver 0.0.0.0:8000
 ```
 
-### 6.2 Checklist de Verificación
+### 5.2 Checklist de Funcionamiento
 
-| Componente | Prueba | Esperado |
-|------------|--------|----------|
-| Firebase | Ver logs | "✓ Firebase inicializado" |
-| Cámara | `ping 172.32.0.93` | Respuesta OK |
-| Luckfox | `nc -zv 172.32.0.93 8081` | "Connection succeeded" |
-| Web | http://localhost:8000 | Dashboard visible |
-
----
-
-## **7. SOLUCIÓN DE PROBLEMAS**
-
-### Error: "No se encontró serviceAccountKey.json"
-```bash
-ls -la ~/Proyecto_RF/django_app/firebase_credentials/
-# Verificar que existe el archivo
-```
-
-### Error: "No se pudo conectar al stream RTSP"
-```bash
-ping 172.32.0.93
-ffplay rtsp://172.32.0.93/live/0
-```
-
-### Error: "Timeout esperando respuesta" (Luckfox)
-```bash
-ssh root@172.32.0.93
-ps aux | grep Luckfox
-./Luckfox_RF  # Si no está corriendo
-```
-
-### Error: "Permission denied" en Luckfox
-```bash
-chmod +x /root/Luckfox_RF
-```
-
-### Error: "0 faces detected"
-- Mejorar iluminación frontal
-- Centrar rostro en cámara
-- Acercarse a la cámara
+| Componente | Acción de Prueba | Resultado Esperado |
+|------------|------------------|-------------------|
+| **Video** | `ffplay rtsp://172.32.0.93/live/0` | Ventana con video fluido |
+| **Conexión Socket** | `nc -zv 172.32.0.93 8081` | `Connection succeeded` |
+| **Panel Web** | Navegar a `http://localhost:8000` | Carga el Login / Dashboard |
+| **Reconocimiento** | Pararse frente a la cámara | Log: `Face detected: [Nombre]` |
 
 ---
 
-**Documento generado - Diciembre 2024**
+## 6. Nuevas Funcionalidades v1.1
+
+### 6.1 Dashboard Estadístico (Business Intelligence)
+
+Se ha integrado un módulo de reportabilidad avanzado en la vista "Lista de Asistencias":
+
+- **Gráfico de Distribución por Carrera:** Visualización circular (Pie Chart) de la asistencia.
+- **Gráfico de Asistencia por Rol:** Barras comparativas (Alumnos vs Docentes vs Externos).
+- **Librería:** Implementado con `Chart.js` + `chartjs-plugin-datalabels`.
+
+### 6.2 Gestión de Roles (RBAC)
+
+| Rol | Permisos |
+|-----|----------|
+| **Administrador** | Control total, configuración de sistema y visión de todos los eventos |
+| **Encargado de Evento** | Vista restringida solo al evento activo para monitoreo de aforo |
+
+### 6.3 Mejoras de UI/UX
+
+- Indicadores visuales de estado (Badges) actualizados a paleta de colores corporativa.
+- Optimización de la columna "Biometría": Indica estado de vector ("Enrolado/Pendiente") en lugar de datos crudos.
+
+---
+
+## 7. Solución de Problemas
+
+### Error: "Connection Refused" al conectar RTSP
+
+- **Causa:** El binario `Luckfox_RF` no está corriendo en la placa.
+- **Solución:** Verificar SSH y ejecutar `./Luckfox_RF`. Asegurar que no hay otro proceso usando la cámara (`rkmedia`).
+
+### Error: "Firebase App Check Token Invalid"
+
+- **Causa:** Reloj del sistema desincronizado.
+- **Solución:** Ejecutar `sudo timedatectl set-ntp on` tanto en el servidor como en la Luckfox.
+
+### Error: Detección lenta o nula
+
+- **Causa:** Baja iluminación o distancia incorrecta.
+- **Solución:** Encender luz frontal auxiliar. La distancia óptima es entre 40cm y 80cm.
+
+### Pantalla Luckfox en Negro
+
+- **Causa:** Driver de pantalla no inicializado o cable SPI suelto.
+- **Solución:** Revisar `dmesg` en Luckfox: `dmesg | grep spi`. Reiniciar placa.
+
+---
+
+**Desarrollado por:** R. Leal & W. Tapia - Ingeniería en Informática 2025.

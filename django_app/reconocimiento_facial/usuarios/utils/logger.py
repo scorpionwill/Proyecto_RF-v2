@@ -1,17 +1,17 @@
 """
-Logging utilities for the face recognition system.
-Provides consistent, formatted logging across the application.
+Utilidades de logging para el sistema de reconocimiento facial.
+Proporciona logging consistente y formateado en toda la aplicación.
 """
 from typing import Optional
 from .. import config
 
 
 class Logger:
-    """Centralized logger for face recognition operations."""
+    """Logger centralizado para operaciones de reconocimiento facial."""
     
     @staticmethod
     def info(message: str, emoji: str = "ℹ️"):
-        """Log info message."""
+        """Registra mensaje informativo."""
         if config.LOG_EMOJI_ENABLED:
             print(f"{emoji} {message}")
         else:
@@ -19,50 +19,50 @@ class Logger:
     
     @staticmethod
     def success(message: str):
-        """Log success message."""
+        """Registra mensaje de éxito."""
         Logger.info(message, "✅")
     
     @staticmethod
     def warning(message: str):
-        """Log warning message."""
+        """Registra mensaje de advertencia."""
         Logger.info(message, "⚠️")
     
     @staticmethod
     def error(message: str):
-        """Log error message."""
+        """Registra mensaje de error."""
         Logger.info(message, "❌")
     
     @staticmethod
     def debug(message: str):
-        """Log debug message."""
+        """Registra mensaje de depuración."""
         Logger.info(message, "🔍")
     
     @staticmethod
     def camera(message: str):
-        """Log camera-related message."""
+        """Registra mensaje relacionado con cámara."""
         Logger.info(message, "📸")
     
     @staticmethod
     def network(message: str):
-        """Log network-related message."""
+        """Registra mensaje relacionado con red."""
         Logger.info(message, "🔌")
     
     @staticmethod
     def recognition(message: str):
-        """Log recognition-related message."""
+        """Registra mensaje relacionado con reconocimiento."""
         Logger.info(message, "👤")
     
     @staticmethod
     def matching(message: str):
-        """Log matching-related message."""
+        """Registra mensaje relacionado con matching."""
         if config.LOG_VERBOSE_MATCHING:
             Logger.info(message, "🔍")
     
     @staticmethod
     def storage(message: str):
-        """Log storage-related message."""
+        """Registra mensaje relacionado con almacenamiento."""
         Logger.info(message, "💾")
 
 
-# Global logger instance
+# Instancia global del logger
 logger = Logger()

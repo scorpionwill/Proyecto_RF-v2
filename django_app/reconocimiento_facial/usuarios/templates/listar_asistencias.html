@@ -16,7 +16,7 @@
     .table-modern thead { background: linear-gradient(90deg, #de4949, #b82020, #800000); color: white; }
     .table-modern tbody tr { transition: all 0.3s ease; }
     .table-modern tbody tr:hover { background-color: rgba(222, 73, 73, 0.05); transform: scale(1.01); box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); }
-    .badge-event { padding: 8px 15px; border-radius: 20px; font-weight: 500; font-size: 0.85rem; background: linear-gradient(90deg, #de4949, #b82020); color: white; }
+    .badge-event { padding: 8px 15px; border-radius: 20px; font-weight: 500; font-size: 1rem; padding: 6px 12px; background: linear-gradient(90deg, #de4949, #b82020); color: white; }
     .empty-state { text-align: center; padding: 60px 20px; color: #6c757d; }
     .empty-state i { font-size: 4rem; margin-bottom: 20px; opacity: 0.3; }
 </style>
@@ -28,6 +28,7 @@
 </div>
 
 <div class="content-wrapper">
+    {% if user.is_staff %}
     <div class="mb-3">
         <form method="GET" class="row g-3 align-items-center">
             <div class="col-md-6">
@@ -74,16 +75,35 @@
             </form>
         </div>
     </div>
+    {% endif %}
 
     <div class="row mb-4">
         <div class="col-md-12">
             <div class="stats-card text-center">
                 <div class="stat-number">{{ total_asistencias }}</div>
-                <div class="stat-label">Total de Asistencias</div>
+                <div class="stat-label" style="color: #000; font-weight: bold;">Total de Asistencias</div>
+                {% if eventos_incluidos %}
+                <div class="mt-2" style="font-size: 1rem; padding: 6px 12px; color: #000; font-weight: bold;">Eventos: {% for e in eventos_incluidos %}<span class="badge bg-danger me-1">{{ e }}</span>{% endfor %}</div>
+                {% endif %}
             </div>
         </div>
     </div>
 
+    <!-- Dashboard Charts -->
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="stats-card">
+                <h5 class="text-center mb-3"><i class="bi bi-pie-chart"></i> Asistencias por Carrera</h5>
+                <canvas id="carrerasChart" height="150"></canvas>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="stats-card">
+                <h5 class="text-center mb-3"><i class="bi bi-bar-chart"></i> Asistencias por Jornada/Rol</h5>
+                <canvas id="jornadasChart" height="200"></canvas>
+            </div>
+        </div>
+    </div>
     <div class="table-responsive">
         {% if asistencias %}
         <table class="table table-hover table-modern">
@@ -109,7 +129,7 @@
                         {% elif jornada == 'E' or jornada == 'Externa' or jornada == 'Externo' %}<span class="badge bg-dark">Externo</span>
                         {% elif jornada == 'Profesor' %}<span class="badge bg-success">Profesor</span>
                         {% elif jornada == 'Administrativo' %}<span class="badge bg-danger">Administrativo</span>
-                        {% else %}<span class="badge bg-secondary">{{ jornada|default:"--" }}</span>
+                        {% else %}<span class="badge bg-danger">{{ jornada|default:"--" }}</span>
                         {% endif %}
                         {% endwith %}
                     </td>
@@ -133,4 +153,81 @@
         {% endif %}
     </div>
 </div>
+{% endblock %}
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    Chart.register(ChartDataLabels);
+    
+    const carrerasLabels = {{ carreras_labels|safe }};
+    const carrerasData = {{ carreras_data|safe }};
+    const jornadasLabels = {{ jornadas_labels|safe }};
+    const jornadasData = {{ jornadas_data|safe }};
+    
+    const colors = [
+        '#3498db', '#2ecc71', '#e74c3c', '#9b59b6', '#f39c12', '#1abc9c', '#e67e22', '#34495e'
+    ];
+    
+    // Gráfico de torta
+    if (carrerasLabels.length > 0) {
+        new Chart(document.getElementById('carrerasChart'), {
+            type: 'pie',
+            data: {
+                labels: carrerasLabels,
+                datasets: [{
+                    data: carrerasData,
+                    backgroundColor: colors.slice(0, carrerasLabels.length),
+                    borderWidth: 2,
+                    borderColor: '#fff'
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    datalabels: {
+                        color: '#000',
+                        font: { weight: 'bold', size: 18 },
+                        anchor: 'center',
+                        align: 'center'
+                    },
+                    legend: { position: 'bottom', labels: { font: { size: 11 } } }
+                }
+            }
+        });
+    }
+    
+    // Gráfico de barras
+    if (jornadasLabels.length > 0) {
+        new Chart(document.getElementById('jornadasChart'), {
+            type: 'bar',
+            data: {
+                labels: jornadasLabels,
+                datasets: [{
+                    label: 'Cantidad',
+                    data: jornadasData,
+                    backgroundColor: ['#f39c12', '#3498db', '#e74c3c', '#27ae60', '#2c3e50'],
+                    borderRadius: 5
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    datalabels: {
+                        color: '#000',
+                        font: { weight: 'bold', size: 16 },
+                        anchor: 'end',
+                        align: 'top'
+                    },
+                    legend: { display: false }
+                },
+                scales: {
+                    y: { beginAtZero: true, ticks: { stepSize: 1 } }
+                }
+            }
+        });
+    }
+});
+</script>
 {% endblock %}

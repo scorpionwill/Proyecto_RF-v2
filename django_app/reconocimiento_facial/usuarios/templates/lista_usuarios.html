@@ -129,7 +129,7 @@
                     <th>Carrera</th>
                     <th>Jornada/Rol</th>
                     <th>Fecha Registro</th>
-                    <th>Vector</th>
+                    <th>Biometría Facial</th>
                     <th>Acciones</th>
                 </tr>
             </thead>
@@ -159,8 +159,7 @@
                     <td>{{ usuario.fecha_registro|slice:":10" }}</td>
                     <td>
                         {% if usuario.vector_facial %}
-                        <i class="bi bi-check-circle-fill text-success"></i> Sí ({{ usuario.vector_facial|length }}
-                        dims)
+                        <i class="bi bi-check-circle-fill text-success"></i> Sí
                         {% else %}
                         <i class="bi bi-x-circle-fill text-danger"></i> No
                         {% endif %}

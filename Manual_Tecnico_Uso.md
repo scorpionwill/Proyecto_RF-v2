@@ -1,29 +1,40 @@
-# **MANUAL TÉCNICO DE USO**
-# **Sistema de Reconocimiento Facial INACAP**
+# Manual Técnico de Uso
+## Sistema de Control de Acceso con Reconocimiento Facial - INACAP
+
+![Version](https://img.shields.io/badge/version-1.1.0-blue.svg)
+![Estado](https://img.shields.io/badge/Estado-Producción-green.svg)
+![Rol](https://img.shields.io/badge/Rol-Administrador%2FEncargado-orange.svg)
 
 ---
 
-**Versión:** 1.0  
-**Fecha:** Diciembre 2024
+**Fecha de Actualización:** Diciembre 2025  
+**Desarrollado por:** R. Leal & W. Tapia
+
+Este documento describe la operación funcional del sistema, desde la gestión administrativa en el panel web hasta la interacción del usuario final con el dispositivo de borde.
 
 ---
 
-## **ÍNDICE**
+## Índice
 
 1. [Acceso al Sistema](#1-acceso-al-sistema)
 2. [Panel de Control (Dashboard)](#2-panel-de-control-dashboard)
 3. [Gestión de Usuarios](#3-gestión-de-usuarios)
-4. [Registro Biométrico](#4-registro-biométrico)
+4. [Enrolamiento Biométrico](#4-enrolamiento-biométrico)
 5. [Gestión de Eventos](#5-gestión-de-eventos)
-6. [Control de Asistencia](#6-control-de-asistencia)
-7. [Reconocimiento Facial en Vivo](#7-reconocimiento-facial-en-vivo)
-8. [Reportes y Estadísticas](#8-reportes-y-estadísticas)
+6. [Operación: Control de Asistencia](#6-operación-control-de-asistencia)
+7. [Interacción con Dispositivo de Borde](#7-interacción-con-dispositivo-de-borde)
+8. [Reportes y Business Intelligence](#8-reportes-y-business-intelligence)
+9. [Solución de Problemas](#9-solución-de-problemas)
 
 ---
 
-## **1. ACCESO AL SISTEMA**
+## 1. Acceso al Sistema
 
-### 1.1 Iniciar el Servidor
+El sistema opera bajo una arquitectura cliente-servidor. El acceso administrativo se realiza vía navegador web desde el PC Maestro o cualquier equipo dentro de la red local autorizada.
+
+### 1.1 Iniciar el Servicio
+
+Antes de acceder, asegúrese de que el servidor Django y el servicio de IA estén activos:
 
 ```bash
 cd ~/Proyecto_RF/django_app/reconocimiento_facial
@@ -31,318 +42,189 @@ source venv/bin/activate
 python3 manage.py runserver 0.0.0.0:8000
 ```
 
-### 1.2 Acceder al Dashboard
+### 1.2 Login y Roles
 
-1. Abrir navegador web (Chrome/Firefox recomendado)
-2. Ir a: `http://IP_SERVIDOR:8000`
-3. Ingresar credenciales de administrador
+Acceda a `http://localhost:8000` (o la IP del servidor).
 
-### 1.3 Roles de Usuario
-
-| Rol | Permisos |
-|-----|----------|
-| **Administrador** | Acceso completo a todas las funciones |
-| **Encargado** | Gestión de eventos y control de asistencia |
+| Rol | Usuario | Alcance | Filtros de Asistencia |
+|-----|---------|---------|----------------------|
+| **Administrador** | admin | Total (Configuración, Usuarios, Todos los Eventos) | Visibles (Todos) |
+| **Encargado** | operador | Limitado (Solo Evento Activo, Validación) | Ocultos (Solo evento actual) |
 
 ---
 
-## **2. PANEL DE CONTROL (DASHBOARD)**
+## 2. Panel de Control (Dashboard)
 
-### 2.1 Elementos del Dashboard
+El Dashboard es el centro de mando que ofrece una vista panorámica del estado del sistema en tiempo real.
+
+### Estructura de la Interfaz
 
 ```
 ┌─────────────────────────────────────────────────────────┐
 │  🏠 INACAP - Sistema de Reconocimiento Facial           │
 ├─────────────────────────────────────────────────────────┤
-│  ┌─────────┐  ┌─────────┐  ┌─────────┐  ┌─────────┐    │
-│  │ Usuarios│  │ Eventos │  │Asistencia│  │ Config  │    │
-│  │   [12]  │  │   [5]   │  │  [156]  │  │   [⚙️]  │    │
-│  └─────────┘  └─────────┘  └─────────┘  └─────────┘    │
+│  ┌─────────┐  ┌─────────┐  ┌─────────┐  ┌─────────┐     │
+│  │ Usuarios│  │ Eventos │  │Asistencia│  │ Config  │     │
+│  │   [12]  │  │   [5]   │  │  [156]  │  │   [⚙️]  │     │
+│  └─────────┘  └─────────┘  └─────────┘  └─────────┘     │
 │                                                         │
-│  📊 Estadísticas Rápidas                                │
-│  ├── Usuarios registrados: 12                           │
-│  ├── Eventos activos: 2                                 │
-│  └── Asistencias hoy: 45                                │
+│  📊 Métricas de Operación                               │
+│  ├── Usuarios registrados: 12 (Total en Firestore)      │
+│  ├── Eventos activos: 1 (Requiere atención)             │
+│  └── Tasa de Éxito Biométrico: 92%                      │
 └─────────────────────────────────────────────────────────┘
 ```
 
-### 2.2 Navegación Principal
+---
 
-| Sección | Función |
-|---------|---------|
-| **Usuarios** | Listar, crear, editar usuarios |
-| **Registro Biométrico** | Capturar datos faciales |
-| **Eventos** | Gestionar eventos/actividades |
-| **Reconocimiento** | Control de asistencia en vivo |
+## 3. Gestión de Usuarios
+
+Módulo CRUD para administrar la base de datos de estudiantes, docentes y externos.
+
+### 3.1 Flujo de Creación
+
+1. Navegar a **Menú > Usuarios > Nuevo Usuario**.
+2. Completar campos obligatorios: RUT (identificador único), Nombre, Carrera, Jornada.
+3. **Estado Biométrico:** Al crear un usuario, este campo aparecerá como "Pendiente" hasta que se realice el enrolamiento.
+
+### 3.2 Edición y Baja
+
+- **Editar:** Permite corregir datos tipográficos. 
+  > **Nota:** Si cambia el RUT, deberá volver a enrolar el rostro.
+- **Deshabilitar:** Bloquea el acceso sin eliminar los registros históricos de asistencia.
 
 ---
 
-## **3. GESTIÓN DE USUARIOS**
+## 4. Enrolamiento Biométrico
 
-### 3.1 Listar Usuarios
+Este es el proceso crítico donde el motor InspireFace captura y vectoriza el rostro del usuario.
 
-1. Click en **"Usuarios"** en el menú
-2. Vista de tabla con todos los usuarios registrados
-3. Filtros disponibles:
-   - Por jornada (Diurna/Vespertina)
-   - Por estado (Activo/Inactivo)
-   - Por carrera
+### 4.1 Preparación del Entorno
 
-### 3.2 Crear Usuario Nuevo
+- **Iluminación:** Asegurar luz frontal uniforme (evitar contraluz).
+- **Distancia:** El usuario debe situarse a 50cm de la cámara web del servidor.
 
-1. Click en **"Nuevo Usuario"**
-2. Completar formulario:
-   - **RUT:** Formato 12345678-9
-   - **Nombre Completo:** Nombres y apellidos
-   - **Carrera:** Seleccionar de lista
-   - **Jornada:** Diurna o Vespertina
-3. Click en **"Guardar"**
+### 4.2 Proceso de Captura
 
-> ⚠️ **Nota:** El usuario debe completar el registro biométrico posteriormente.
-
-### 3.3 Editar Usuario
-
-1. En la lista, click en **"Editar"** (ícono lápiz)
-2. Modificar campos necesarios
-3. Click en **"Actualizar"**
-
-### 3.4 Deshabilitar Usuario
-
-1. Click en **"Deshabilitar"** (ícono candado)
-2. Confirmar acción
-3. El usuario no podrá ser reconocido hasta reactivarlo
-
----
-
-## **4. REGISTRO BIOMÉTRICO**
-
-### 4.1 Requisitos Previos
-
-- Cámara IP conectada y funcionando
-- Buena iluminación frontal
-- Usuario mirando directamente a la cámara
-
-### 4.2 Proceso de Registro
-
-1. Ir a **"Registro Biométrico"**
-2. Ingresar RUT del usuario
-3. Verificar datos mostrados
-4. Click en **"Iniciar Captura"**
-
-### 4.3 Durante la Captura
+1. Seleccionar usuario en la lista y dar click en **"Captura Biométrica"**.
+2. El sistema iniciará una ráfaga de captura de **100 frames**.
+3. **Validación de Calidad:** El algoritmo seleccionará los frames con mejor alineación y nitidez.
+4. **Generación del Vector:** Se calcula un vector promedio de 512 dimensiones y se guarda en Firebase.
 
 ```
-┌─────────────────────────────────────────┐
-│        📷 CAPTURA EN PROGRESO           │
-│                                         │
-│  ┌─────────────────────────────────┐   │
-│  │                                 │   │
-│  │      [Vista de cámara]          │   │
-│  │                                 │   │
-│  │         😊                      │   │
-│  │                                 │   │
-│  └─────────────────────────────────┘   │
-│                                         │
-│  Progreso: ████████░░ 80%              │
-│  Frames capturados: 40/50               │
-│                                         │
-│  ⏱️ Tiempo restante: 2 segundos         │
-└─────────────────────────────────────────┘
+Progreso de Captura:
+[██████████░░░░░] 65% - Mantenga el rostro firme
 ```
 
-**Instrucciones para el usuario:**
-- Mantener rostro centrado
-- Mirar directamente a la cámara
-- No moverse durante la captura
-- Mantener expresión neutral
-
-### 4.4 Confirmación de Registro
-
-Una vez completada la captura:
-- Se extraen 50 vectores faciales
-- Se calcula el vector promedio
-- Se guarda foto de perfil
-- Mensaje: "✅ Registro biométrico completado"
+✅ **Éxito:** El estado del usuario cambia a "Enrolado" y se muestra la foto de perfil generada.
 
 ---
 
-## **5. GESTIÓN DE EVENTOS**
+## 5. Gestión de Eventos
 
-### 5.1 Crear Evento
+Permite planificar las actividades académicas que requieren control de aforo.
 
-1. Ir a **"Eventos"** → **"Nuevo Evento"**
-2. Completar información:
-   - **Nombre:** Título del evento
-   - **Descripción:** Detalles adicionales
-   - **Fecha:** YYYY-MM-DD
-   - **Hora inicio:** HH:MM
-   - **Hora fin:** HH:MM
-   - **Relator:** Nombre del expositor
-   - **Ubicación:** Sala/Auditorio
+### Creación de Eventos
 
-### 5.2 Estados del Evento
+Definir: Título, Expositor, Ubicación y Horario (Inicio/Fin).
+
+### Estados del Evento
 
 | Estado | Significado |
 |--------|-------------|
-| 🟡 **Pendiente** | Aún no ha comenzado |
-| 🟢 **Activo** | En curso (hora actual dentro del rango) |
-| ⚫ **Finalizado** | Ya terminó |
-
-### 5.3 Editar/Eliminar Evento
-
-- **Editar:** Click en ✏️ para modificar datos
-- **Eliminar:** Click en 🗑️ (solo si no tiene asistencias)
+| 🟡 **Pendiente** | Fecha futura |
+| 🟢 **Activo** | Fecha/Hora actual coincide. Solo los eventos activos permiten marcar asistencia |
+| ⚫ **Finalizado** | Fecha pasada |
 
 ---
 
-## **6. CONTROL DE ASISTENCIA**
+## 6. Operación: Control de Asistencia
 
-### 6.1 Iniciar Control de Asistencia
+Módulo principal utilizado durante la ejecución del evento. Conecta el stream de video RTSP con el motor de IA.
 
-1. En la lista de eventos, click en **"Reconocer"**
-2. Se abre la pantalla de reconocimiento facial
+### 6.1 Panel de Reconocimiento
 
-### 6.2 Pantalla de Reconocimiento
+Al pulsar **"Iniciar Reconocimiento"**, el sistema:
 
-```
-┌────────────────────────────────────────────────────────────┐
-│  📹 RECONOCIMIENTO FACIAL - Evento: Charla TI             │
-├──────────────────────────────────┬─────────────────────────┤
-│                                  │  📊 ASISTENTES          │
-│  ┌──────────────────────────┐   │  ┌───────────────────┐  │
-│  │                          │   │  │ Total:    [45]    │  │
-│  │    [Stream de cámara]    │   │  │ Biométrico: [38]  │  │
-│  │                          │   │  │ Manual:   [7]     │  │
-│  │                          │   │  └───────────────────┘  │
-│  └──────────────────────────┘   │                         │
-│                                  │  👤 ÚLTIMO RECONOCIDO   │
-│  [▶️ Iniciar] [⏹️ Detener]       │  ┌───────────────────┐  │
-│  [📝 Ingreso Manual]             │  │ Juan Pérez        │  │
-│                                  │  │ RUT: 12345678-9   │  │
-│                                  │  │ ✅ Registrado     │  │
-│                                  │  └───────────────────┘  │
-└──────────────────────────────────┴─────────────────────────┘
-```
+1. Conecta al stream `rtsp://<IP_LUCKFOX>/live/0`.
+2. Procesa cada frame buscando coincidencias con la base de datos de vectores (Firestore).
+3. **Umbral de Decisión:** Si la similitud (Cosine Similarity) > 0.80, se considera un "Match".
 
-### 6.3 Flujo de Reconocimiento
+### 6.2 Ingreso Manual (Contingencia)
 
-1. Click en **"Iniciar Reconocimiento"**
-2. Sistema busca rostros continuamente
-3. Al detectar match:
-   - Envía credencial a Luckfox
-   - Usuario confirma en pantalla táctil
-   - Se registra asistencia
-4. Dashboard se actualiza automáticamente
+Si un usuario no logra ser reconocido (por uso de mascarilla, lentes oscuros o fallo del sistema):
 
-### 6.4 Ingreso Manual
-
-Para usuarios sin registro biométrico:
-1. Click en **"Ingreso Manual"**
-2. Ingresar RUT (se autocompletan datos si existe)
-3. Completar campos requeridos
-4. Click en **"Registrar Asistencia"**
+1. Click en botón **"Ingreso Manual"**.
+2. Digitar RUT.
+3. El sistema registra la asistencia marcando el origen como `MANUAL` para estadísticas posteriores.
 
 ---
 
-## **7. RECONOCIMIENTO FACIAL EN VIVO**
+## 7. Interacción con Dispositivo de Borde
 
-### 7.1 Flujo de Confirmación en Luckfox
+Esta sección describe lo que ve el usuario final en la pantalla LCD de la Luckfox Pico.
+
+### 7.1 Flujo de Verificación
+
+Cuando el servidor detecta un rostro, envía una señal TCP al puerto 8081 de la Luckfox, activando la siguiente interfaz:
 
 ```
 ┌─────────────────────────────────────┐
-│          LUCKFOX PICO               │
+│          CONFIRMAR ACCESO           │
+├─────────────────────────────────────┤
 │                                     │
-│  ┌─────────────────────────────┐   │
-│  │       📷 [Foto]             │   │
-│  │                             │   │
-│  │     Juan Pérez López        │   │
-│  │     RUT: 12.345.678-9       │   │
-│  │     Ing. Informática        │   │
-│  │     Jornada: Diurna         │   │
-│  │                             │   │
-│  │   [❌ NO]      [✅ SÍ]      │   │
-│  └─────────────────────────────┘   │
+│        [ FOTO DEL USUARIO ]         │
 │                                     │
-└─────────────────────────────────────┘
+│    Juan Pérez López                 │
+│    Ingeniería en Informática        │
+│                                     │
+├──────────────────┬──────────────────┤
+│    ❌ RECHAZAR   │    ✅ ACEPTAR    │
+└──────────────────┴──────────────────┘
 ```
 
 ### 7.2 Acciones del Usuario
 
 | Botón | Acción | Resultado |
 |-------|--------|-----------|
-| ✅ **SÍ** | Confirmar identidad | Se registra asistencia |
-| ❌ **NO** | Rechazar identidad | Se cancela, vuelve a buscar |
+| ✅ **ACEPTAR** | El usuario confirma que los datos son correctos | Asistencia guardada, pantalla muestra borde VERDE |
+| ❌ **RECHAZAR** | El usuario indica error | No se guarda asistencia, pantalla muestra borde ROJO |
 
-### 7.3 Timeout de Confirmación
-
-- Tiempo límite: **30 segundos**
-- Si no hay acción: Se considera rechazo
-- Sistema continúa buscando otros rostros
+**Tiempo de Espera:** 30 segundos. Si no hay interacción, se descarta.
 
 ---
 
-## **8. REPORTES Y ESTADÍSTICAS**
+## 8. Reportes y Business Intelligence
 
-### 8.1 Ver Asistencias de un Evento
+**Novedad v1.1:** Visualización gráfica de datos utilizando la librería Chart.js.
 
-1. Ir a **"Eventos"**
-2. Click en **"Ver Asistencias"**
-3. Tabla con:
-   - Nombre del asistente
-   - RUT
-   - Hora de registro
-   - Método (biométrico/manual)
-   - Similitud (si aplica)
+### 8.1 Dashboard Estadístico
 
-### 8.2 Exportar Datos
+Ubicado en la pestaña "Lista de Asistencias", ofrece:
 
-*(Funcionalidad futura)*
+- **Gráfico de Torta (Carreras):** Distribución porcentual de asistencia (Ej: 40% Informática, 30% Mecánica).
+- **Gráfico de Barras (Roles):** Comparativa de asistencia (Alumnos vs. Docentes vs. Externos).
+- **Indicadores de Eventos:** Badges con nombres de eventos incluidos en las estadísticas.
 
-- Exportar a CSV
-- Exportar a PDF
-- Enviar por correo
+### 8.2 Exportación de Datos
 
-### 8.3 Estadísticas del Dashboard
+Para fines administrativos, los listados pueden exportarse:
 
-| Métrica | Descripción |
-|---------|-------------|
-| **Total Usuarios** | Cantidad de usuarios registrados |
-| **Con Biometría** | Usuarios con vector facial |
-| **Eventos Activos** | Eventos en curso hoy |
-| **Asistencias Hoy** | Registros del día actual |
+1. Seleccionar Evento.
+2. Click en botón **"Exportar a Excel"**.
+3. El archivo generado incluye: Nombre, RUT, Hora Exacta, Método de Entrada (Bio/Manual) y Nivel de Confianza.
 
 ---
 
-## **ATAJOS DE TECLADO**
+## 9. Solución de Problemas
 
-| Tecla | Acción |
-|-------|--------|
-| `Ctrl + N` | Nuevo usuario |
-| `Ctrl + E` | Nuevo evento |
-| `Esc` | Cerrar modal |
-| `Enter` | Confirmar formulario |
-
----
-
-## **GLOSARIO**
-
-| Término | Definición |
-|---------|------------|
-| **Vector Facial** | Representación numérica de 512 valores que describe características únicas del rostro |
-| **Similitud** | Porcentaje de coincidencia entre dos vectores (0-100%) |
-| **Umbral** | Mínima similitud requerida para confirmar identidad (45% por defecto) |
-| **RTSP** | Protocolo de streaming de video en tiempo real |
-| **Match** | Coincidencia exitosa entre rostro capturado y usuario registrado |
+| Síntoma | Causa Probable | Solución |
+|---------|----------------|----------|
+| Video en negro | Luckfox no transmite RTSP | Reiniciar placa Luckfox y verificar conexión de red |
+| No reconoce rostros | Luz insuficiente | Encender luz auxiliar frontal. Acercar usuario a 50cm |
+| Pantalla Luckfox no responde | Servicio TCP caído | Verificar que `Luckfox_RF` esté corriendo en la placa |
+| Error de Base de Datos | Sin internet | El sistema requiere conexión para validar con Firebase |
 
 ---
 
-## **CONTACTO SOPORTE**
-
-Para asistencia técnica:
-- Revisar logs del servidor Django
-- Consultar Manual de Instalación
-- Revisar Informe Técnico completo
-
----
-
-**Documento generado - Diciembre 2024**
+**Soporte Técnico:** Contactar al equipo de desarrollo (R. Leal / W. Tapia).

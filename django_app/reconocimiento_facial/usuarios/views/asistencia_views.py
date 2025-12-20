@@ -4,7 +4,37 @@ from django.shortcuts import render
 from django.contrib import messages
 from ..services.firebase_service import firebase_service
 from ..decorators import encargado_or_admin
+import json
 
+
+def calcular_estadisticas_charts(asistencias):
+    """Calcula estadísticas para los gráficos de dashboard."""
+    carreras = {}
+    for a in asistencias:
+        carrera = a.get('carrera_usuario', 'Sin carrera') or 'Sin carrera'
+        carreras[carrera] = carreras.get(carrera, 0) + 1
+    
+    jornadas = {}
+    for a in asistencias:
+        jornada = a.get('jornada_usuario', 'Sin jornada') or 'Sin jornada'
+        if jornada in ['D', 'Diurna']:
+            jornada = 'Diurna'
+        elif jornada in ['V', 'Vespertina']:
+            jornada = 'Vespertina'
+        elif jornada in ['E', 'Externa', 'Externo']:
+            jornada = 'Externo'
+        jornadas[jornada] = jornadas.get(jornada, 0) + 1
+    
+    # Obtener eventos únicos
+    eventos_unicos = list(set(a.get('nombre_evento', '') for a in asistencias if a.get('nombre_evento')))
+    
+    return {
+        'carreras_labels': json.dumps(list(carreras.keys())),
+        'carreras_data': json.dumps(list(carreras.values())),
+        'jornadas_labels': json.dumps(list(jornadas.keys())),
+        'jornadas_data': json.dumps(list(jornadas.values())),
+        'eventos_incluidos': eventos_unicos,
+    }
 
 @encargado_or_admin
 def listar_asistencias(request):
@@ -44,10 +74,12 @@ def listar_asistencias(request):
                 if 'fecha_hora' in a:
                     a['fecha_hora'] = a['fecha_hora'].replace('T', ' ')[:19]
             
+            chart_stats = calcular_estadisticas_charts(asistencias)
             context = {
                 'asistencias': asistencias,
                 'total_asistencias': len(asistencias),
-                'search_query': ''
+                'search_query': '',
+                **chart_stats
             }
             
             return render(request, 'listar_asistencias.html', context)
@@ -141,6 +173,7 @@ def listar_asistencias(request):
                         pass
             available_days = [{'day': d, 'count': c} for d, c in sorted(days.items())]
         
+        chart_stats = calcular_estadisticas_charts(asistencias_filtradas)
         context = {
             'asistencias': asistencias_filtradas,
             'total_asistencias': len(asistencias_filtradas),
@@ -151,6 +184,7 @@ def listar_asistencias(request):
             'year_selected': int(year_filter) if year_filter else None,
             'month_selected': int(month_filter) if month_filter else None,
             'day_selected': int(day_filter) if day_filter else None,
+            **chart_stats
         }
         
         return render(request, 'listar_asistencias.html', context)

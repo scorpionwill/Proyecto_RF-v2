@@ -99,7 +99,7 @@ def capturar_rostro_luckfox(request):
             if not ret:
                 continue
             
-            # Resize to Full HD 1080p for optimal quality
+            # Redimensionar a Full HD 1080p para calidad óptima
             frame = cv2.resize(frame, (1920, 1080), interpolation=cv2.INTER_LINEAR)
             
             try:
@@ -316,7 +316,7 @@ def luckfox_stream(request):
                 cap = cv2.VideoCapture(rtsp_url, cv2.CAP_FFMPEG)
                 
                 # OPTIMIZACIONES DE LATENCIA (sin perder calidad de imagen):
-                cap.set(cv2.CAP_PROP_BUFFERSIZE, 1)  # Buffer mínimo (reduce delay)
+                cap.set(cv2.CAP_PROP_BUFFERSIZE, 1)  # Buffer mínimo (reduce retraso)
                 cap.set(cv2.CAP_PROP_FPS, 30)        # 30 FPS para fluidez
                 
                 if not cap.isOpened():
@@ -437,7 +437,7 @@ def capturar_foto_perfil(request):
                 'error': f'Frame capturado está muy claro (brillo: {frame_mean:.1f}), intenta de nuevo'
             }, status=500)
         
-        # Resize to Full HD 1080p
+        # Redimensionar a Full HD 1080p
         frame = cv2.resize(frame, (1920, 1080), interpolation=cv2.INTER_LINEAR)
         
         # Codificar a JPEG con calidad 95 para Firebase

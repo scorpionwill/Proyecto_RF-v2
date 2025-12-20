@@ -126,14 +126,20 @@
         font-size: 15px;
         display: flex;
         justify-content: space-between;
+        gap: 15px;
     }
 
     .credencial-info p strong {
         color: white;
+        flex-shrink: 0;
     }
 
     .credencial-info p span {
         color: white;
+        text-align: right;
+        flex: 1;
+        margin-left: 15px;
+        /* Ensure minimum gap is respected */
     }
 
 
@@ -259,9 +265,6 @@
                         <p><strong>RUT:</strong> <span id="credencialRut">--</span></p>
                         <p><strong>Carrera:</strong> <span id="credencialCarrera">--</span></p>
                         <p><strong>Jornada:</strong> <span id="credencialJornada">--</span></p>
-                        <p><strong>Similitud:</strong> <span id="credencialSimilitud"
-                                class="text-white fw-bold">--</span>
-                        </p>
                     </div>
 
                     <!-- Badge de resultado (oculto inicialmente) -->
@@ -546,9 +549,12 @@
 
             // Formatear jornada
             const jornada = data.usuario.jornada || '';
-            document.getElementById('credencialJornada').textContent = jornada === 'D' ? 'Diurna' : jornada === 'V' ? 'Vespertina' : '--';
+            let jornadaTexto = '--';
+            if (jornada === 'D' || jornada === 'Diurna') jornadaTexto = 'Diurna';
+            else if (jornada === 'V' || jornada === 'Vespertina') jornadaTexto = 'Vespertina';
+            else if (jornada) jornadaTexto = jornada;
+            document.getElementById('credencialJornada').textContent = jornadaTexto;
 
-            document.getElementById('credencialSimilitud').textContent = `${(data.similitud * 100).toFixed(1)}%`;
 
             // Actualizar foto
             if (data.usuario.imagen) {
