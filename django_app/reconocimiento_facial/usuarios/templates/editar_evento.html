@@ -7,7 +7,17 @@
 <div class="container">
     <h1>Editar Evento</h1>
 
-    <!-- Muestra un mensaje de error si es necesario -->
+    <!-- Mostrar mensajes de Django (errores, éxitos, etc.) -->
+    {% if messages %}
+    {% for message in messages %}
+    <div class="alert alert-danger alert-dismissible fade show text-center" role="alert">
+        {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+    </div>
+    {% endfor %}
+    {% endif %}
+
+    <!-- Si la vista envía un mensaje de error directo -->
     {% if error %}
     <div class="alert alert-danger text-center">
         {{ error }}

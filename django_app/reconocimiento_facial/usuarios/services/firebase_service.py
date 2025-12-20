@@ -384,6 +384,60 @@ class FirebaseService:
             print(f"Error eliminando evento: {e}")
             return False
 
+    def verificar_superposicion_evento(self, fecha, hora_inicio, hora_fin, excluir_id=None):
+        """
+        Verifica si existe un evento activo/pendiente que se superponga con el horario dado.
+        
+        Args:
+            fecha (str): Fecha del evento (YYYY-MM-DD)
+            hora_inicio (str): Hora de inicio (HH:MM)
+            hora_fin (str): Hora de fin (HH:MM)
+            excluir_id (str): ID del evento a excluir (para edición)
+        
+        Returns:
+            dict: Evento en conflicto o None si no hay superposición
+        """
+        try:
+            from datetime import time
+            
+            # Parsear horas del nuevo evento
+            h_inicio_nuevo = time.fromisoformat(hora_inicio)
+            h_fin_nuevo = time.fromisoformat(hora_fin)
+            
+            # Buscar eventos en la misma fecha
+            docs = self.db.collection('eventos').where('fecha', '==', fecha).stream()
+            
+            for doc in docs:
+                # Excluir el evento actual si estamos editando
+                if excluir_id and doc.id == excluir_id:
+                    continue
+                
+                data = doc.to_dict()
+                data['id'] = doc.id
+                
+                # Solo considerar eventos activos o pendientes (no finalizados)
+                estado = data.get('estado', 'pendiente')
+                if estado == 'finalizado':
+                    continue
+                
+                # Parsear horas del evento existente
+                try:
+                    h_inicio_existente = time.fromisoformat(data.get('hora_inicio', '00:00'))
+                    h_fin_existente = time.fromisoformat(data.get('hora_fin', '23:59'))
+                except:
+                    continue
+                
+                # Verificar superposición de horarios
+                # Hay superposición si: inicio_nuevo < fin_existente AND fin_nuevo > inicio_existente
+                if h_inicio_nuevo < h_fin_existente and h_fin_nuevo > h_inicio_existente:
+                    return data  # Retorna el evento en conflicto
+            
+            return None  # No hay superposición
+            
+        except Exception as e:
+            print(f"Error verificando superposición: {e}")
+            return None
+
     def obtener_evento_activo(self):
         """
         Busca un evento activo basado en fecha Y hora actual.

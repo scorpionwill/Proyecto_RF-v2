@@ -161,12 +161,29 @@ def crear_evento(request):
     """Crea un nuevo evento."""
     if request.method == 'POST':
         try:
+            fecha = request.POST.get('fecha')
+            hora_inicio = request.POST.get('hora_inicio')
+            hora_fin = request.POST.get('hora_fin')
+            
+            # Verificar superposición con eventos existentes
+            evento_conflicto = firebase_service.verificar_superposicion_evento(
+                fecha, hora_inicio, hora_fin
+            )
+            
+            if evento_conflicto:
+                messages.error(
+                    request,
+                    f"⚠️ No se puede crear el evento. Ya existe un evento activo en esa fecha y horario: "
+                    f"'{evento_conflicto.get('nombre')}' ({evento_conflicto.get('hora_inicio')} - {evento_conflicto.get('hora_fin')})"
+                )
+                return render(request, 'crear_evento.html')
+            
             firebase_service.crear_evento(
                 nombre=request.POST.get('nom_evento'),
                 descripcion=request.POST.get('descripcion'),
-                fecha=request.POST.get('fecha'),
-                hora_inicio=request.POST.get('hora_inicio'),
-                hora_fin=request.POST.get('hora_fin'),
+                fecha=fecha,
+                hora_inicio=hora_inicio,
+                hora_fin=hora_fin,
                 relator=request.POST.get('relator'),
                 ubicacion=request.POST.get('ubicacion')
             )
@@ -183,13 +200,31 @@ def editar_evento(request, evento_id):
     """Edita un evento existente."""
     if request.method == 'POST':
         try:
+            fecha = request.POST.get('fecha')
+            hora_inicio = request.POST.get('hora_inicio')
+            hora_fin = request.POST.get('hora_fin')
+            
+            # Verificar superposición con otros eventos (excluir el actual)
+            evento_conflicto = firebase_service.verificar_superposicion_evento(
+                fecha, hora_inicio, hora_fin, excluir_id=evento_id
+            )
+            
+            if evento_conflicto:
+                evento = firebase_service.obtener_evento(evento_id)
+                messages.error(
+                    request,
+                    f"⚠️ No se puede modificar el evento. Ya existe otro evento activo en esa fecha y horario: "
+                    f"'{evento_conflicto.get('nombre')}' ({evento_conflicto.get('hora_inicio')} - {evento_conflicto.get('hora_fin')})"
+                )
+                return render(request, 'editar_evento.html', {'evento': evento})
+            
             firebase_service.actualizar_evento(
                 evento_id,
                 nombre=request.POST.get('nom_evento'),
                 descripcion=request.POST.get('descripcion'),
-                fecha=request.POST.get('fecha'),
-                hora_inicio=request.POST.get('hora_inicio'),
-                hora_fin=request.POST.get('hora_fin'),
+                fecha=fecha,
+                hora_inicio=hora_inicio,
+                hora_fin=hora_fin,
                 relator=request.POST.get('relator'),
                 ubicacion=request.POST.get('ubicacion')
             )
